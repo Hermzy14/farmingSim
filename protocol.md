@@ -21,11 +21,28 @@ distributed application.
 TODO - what transport-layer protocol do you use? TCP? UDP? What port number(s)? Why did you 
 choose this transport layer protocol?
 
+We have chosen to use TCP as our underlying transport protocol, and 9057 as our port number. We choose TCP instead of
+UDP because of the superior reliability. We believe it is more important for this application to have reliable data
+transfer instead of prioritizing speed and efficiency.
+
 ## The architecture
 
 TODO - show the general architecture of your network. Which part is a server? Who are clients? 
 Do you have one or several servers? Perhaps include a picture here. 
 
+We have defined the control-panel nodes as the clients and the sensor/actuator nodes as the servers.
+- The control-panel nodes will initiate communication to request sensor data or send control commands to sensor/actuator nodes.
+- The sensor/actuator nodes will respond to client requests by providing sensor data or executing commands sent by the control-panel nodes.
+
+The different nodes:
+1. Sensor/Actuator nodes.
+2. Control-Panel nodes.
+
+The sensor/actuator nodes collect data from sensors like temperature or humidity sensors, 
+and control actuators like fans and heaters. The control-panel nodes act as user interfaces 
+for monitoring sensor data and controlling actuators. They can send control commands to specific 
+sensor/actuator nodes. They will also receive and visualize data from the sensor nodes, like sensor 
+readings and actuator statuses.
 
 ## The flow of information and events
 
