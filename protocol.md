@@ -79,7 +79,7 @@ TODO - describe the possible error messages that nodes can send in your system.
 
 1. **MessageFormatError**:
    - Caused by receiving a message in an unexpected format.
-   - The sensor/actuator nodes should handle this by logging the error, and itgnore the message if it cannot be parsed. 
+   - The sensor/actuator nodes should handle this by logging the error, and ignore the message if it cannot be parsed. 
    Then send an error response back to the control-panel node.
    - Control-panel node should notify the user about the error ("Invalid response from sensor node") then we ask user 
    if we should retry sending the message.
@@ -117,3 +117,10 @@ example scenario could be as follows:
 ## Reliability and security
 
 TODO - describe the reliability and security mechanisms your solution supports.
+### Reliability:
+- We have error handling for the different types of errors that can occur in the system. 
+- We will also implement a checksum to compare the received data with the expected data.
+- We define a timeout for each packet, so the sender can retransmit.
+### Security:
+- Use encryption key-exchange to encrypt and decrypt messages.
+- Use a MAC based authentication. This makes ti a lot harder for an intruder to tamper with the system.
