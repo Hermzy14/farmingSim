@@ -50,10 +50,18 @@ TODO - describe what each network node does and when. Some periodic events? Some
 incoming packets? Perhaps split into several subsections, where each subsection describes one 
 node type (For example: one subsection for sensor/actuator nodes, one for control panel nodes).
 
+We have chosen a pull-based approach, where control panels request sensor data from sensor/actuator nodes.
+This is a simple approach that works well for less frequent updates of sensor data. 
+
 ## Connection and state
 
 TODO - is your communication protocol connection-oriented or connection-less? Is it stateful or 
 stateless? 
+
+Our communication protocol is connection-oriented and stateful. This is because we want to keep track of the state of the
+sensor/actuator nodes and the control-panel nodes. This is important for the control-panel nodes to know which sensor/actuator
+nodes are available and what their current state is. It being a connection-oriented protocol will provide is with a 
+possibility for good error handling and ensuring data integrity.
 
 ## Types, constants
 
@@ -68,6 +76,26 @@ message type in your protocol.
 ### Error messages
 
 TODO - describe the possible error messages that nodes can send in your system.
+
+1. **MessageFormatError**:
+   - Caused by receiving a message in an unexpected format.
+   - The sensor/actuator nodes should handle this by logging the error, and itgnore the message if it cannot be parsed. 
+   Then send an error response back to the control-panel node.
+   - Control-panel node should notify the user about the error ("Invalid response from sensor node") then we ask user 
+   if we should retry sending the message.
+2. **ConnectionError**:
+   - If a node receives a message with an invalid or expired session.
+   - The control-panel node will attempt to reconnect automatically and retry the message transmission up to a specified 
+   number of attempts. If we exceed the max retries, then we log the connection error and notify the application 
+   layer and user.
+   - The sensor/actuator nodes should also retry the message transmission up to the defined limit, as well as log the 
+   failure and send an alert to the control-panel (if possible).
+3. **UnexpectedError**:
+   - For any other unexpected errors.
+   - Should log the error details.
+   - Handle the error "gracefully" so that nothing crashes.
+   - Notify application layer about the error.
+   - Notify user about error.
 
 ## An example scenario
 
