@@ -1,10 +1,8 @@
 # Communication protocol
-
 This document describes the protocol used for communication between the different nodes of the
 distributed application.
 
 ## Terminology
-
 * Sensor - a device which senses the environment and describes it with a value (an integer value in
   the context of this project). Examples: temperature sensor, humidity sensor.
 * Actuator - a device which can influence the environment. Examples: a fan, a window opener/closer,
@@ -17,19 +15,11 @@ distributed application.
   it.
 
 ## The underlying transport protocol
-
-TODO - what transport-layer protocol do you use? TCP? UDP? What port number(s)? Why did you 
-choose this transport layer protocol?
-
 We have chosen to use TCP as our underlying transport protocol, and 9057 as our port number. We choose TCP instead of
 UDP because of the superior reliability. We believe it is more important for this application to have reliable data
 transfer instead of prioritizing speed and efficiency.
 
 ## The architecture
-
-TODO - show the general architecture of your network. Which part is a server? Who are clients? 
-Do you have one or several servers? Perhaps include a picture here. 
-
 We have defined the control-panel nodes as the clients and the sensor/actuator nodes as the servers.
 - The control-panel nodes will initiate communication to request sensor data or send control commands to sensor/actuator nodes.
 - The sensor/actuator nodes will respond to client requests by providing sensor data or executing commands sent by the control-panel nodes.
@@ -45,19 +35,10 @@ sensor/actuator nodes. They will also receive and visualize data from the sensor
 readings and actuator statuses.
 
 ## The flow of information and events
-
-TODO - describe what each network node does and when. Some periodic events? Some reaction on 
-incoming packets? Perhaps split into several subsections, where each subsection describes one 
-node type (For example: one subsection for sensor/actuator nodes, one for control panel nodes).
-
 We have chosen a pull-based approach, where control panels request sensor data from sensor/actuator nodes.
 This is a simple approach that works well for less frequent updates of sensor data. 
 
 ## Connection and state
-
-TODO - is your communication protocol connection-oriented or connection-less? Is it stateful or 
-stateless? 
-
 Our communication protocol is connection-oriented and stateful. This is because we want to keep track of the state of the
 sensor/actuator nodes and the control-panel nodes. This is important for the control-panel nodes to know which sensor/actuator
 nodes are available and what their current state is. It being a connection-oriented protocol will provide is with a 
@@ -69,10 +50,6 @@ TODO - Do you have some specific value types you use in several messages? They y
 them here.
 
 ## Message format
-
-TODO - describe the general format of all messages. Then describe specific format for each 
-message type in your protocol.
-
 We are going to have two main message categories: Sensor messages and Command messages.
 
 1. SENSOR_DATA (pull sensor data)
@@ -103,9 +80,6 @@ TLV structure:
 - Value: Variable The actual payload
 
 ### Error messages
-
-TODO - describe the possible error messages that nodes can send in your system.
-
 1. **MessageFormatError**:
    - Caused by receiving a message in an unexpected format.
    - The sensor/actuator nodes should handle this by logging the error, and ignore the message if it cannot be parsed. 
@@ -127,25 +101,35 @@ TODO - describe the possible error messages that nodes can send in your system.
    - Notify user about error.
 
 ## An example scenario
-
-TODO - describe a typical scenario. How would it look like from communication perspective? When 
-are connections established? Which packets are sent? How do nodes react on the packets? An 
-example scenario could be as follows:
-1. A sensor node with ID=1 is started. It has a temperature sensor, two humidity sensors. It can
-   also open a window.
-2. A sensor node with ID=2 is started. It has a single temperature sensor and can control two fans
-   and a heater.
-3. A control panel node is started.
-4. Another control panel node is started.
-5. A sensor node with ID=3 is started. It has a two temperature sensors and no actuators.
-6. After 5 seconds all three sensor/actuator nodes broadcast their sensor data.
-7. The user of the first-control panel presses on the button "ON" for the first fan of
-   sensor/actuator node with ID=2.
-8. The user of the second control-panel node presses on the button "turn off all actuators".
+1.  Sensor Node ID= 1 is started:
+- It initializes its sesors(1 temprature senor, 2 humidity sensors) and its actuator (a window)
+- It establishes a TCP connection with the control panel and send a registration packet.
+2. Sensor Node ID=2 is started:
+- It initializes its sensors (1 temperature sensor) and actuators (2 fans and a heater). 
+- It establishes a TCP connection with the control panel and sends a similar registration packet:
+3.  Control Panel Node 1 is started:
+- It begins listening for incoming TCP connections from sensor/actuator nodes.
+- It stores the capabilities of connected nodes.
+4. Control Panel Node 2 is started:
+- It also begins listening for TCP connections.
+- It mirrors the same functionality as the first control panel.
+5. Sensor Node ID=3 is started:
+- It initializes its sensors (2 temperature sensors) with no actuators.
+- It establishes a connection and registers
+6. Broadcasting sensor data:
+- Command panel request data from seonsor nodes.
+- 10 seconds after initialization, all three sensor nodes broadcast their current sensor data to the control panels.
+7.   User interaction with control panel 1:
+- The user of Control Panel 1 presses a button to turn on the first fan of Sensor Node ID=2.
+- Control Panel 1 sends a command to Sensor Node ID=2.
+- Sensor Node ID=2 turns on the fan and sends a confirmation back to the control panel.
+8. User Interaction with Control Panel 2:
+- The user of Control Panel 2 presses a button to turn off all actuators.
+- Control Panel 2 sends commands to all sensor nodes with actuators.
+- Each node executes the commands (e.g., closing the window, turning off fans, and shutting down the heater) and sends 
+confirmations to Control Panel 2.
 
 ## Reliability and security
-
-TODO - describe the reliability and security mechanisms your solution supports.
 ### Reliability:
 - We have error handling for the different types of errors that can occur in the system. 
 - We will also implement a checksum to compare the received data with the expected data.
