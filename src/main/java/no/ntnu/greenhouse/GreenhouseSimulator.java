@@ -94,7 +94,7 @@ public class GreenhouseSimulator {
    *
    * @return {@code true} on success, {@code false} on error.
    */
-  private boolean openListeningSocket(){
+  private boolean openListeningSocket() {
     boolean success = false;
     try {
       this.serverSocket = new ServerSocket(this.TCP_PORT);
@@ -143,7 +143,13 @@ public class GreenhouseSimulator {
       }
     } else {
       // TODO - here you stop the TCP/UDP communication
-
+      try {
+        if (serverSocket != null && !serverSocket.isClosed()) {
+          serverSocket.close();
+        }
+      } catch (IOException e) {
+        Logger.error("Error while closing the server socket: " + e.getMessage());
+      }
     }
   }
 
