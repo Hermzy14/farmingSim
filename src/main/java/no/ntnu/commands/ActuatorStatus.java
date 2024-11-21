@@ -6,7 +6,7 @@ package no.ntnu.commands;
  * <p>When a node has new actuator status, it sends this command to the control panel node.
  * The control panel node will then update the GUI with the new actuator status.
  */
-public class ActuatorStatus {
+public class ActuatorStatus implements Command {
   private final int nodeId;
   private final boolean status;
 
