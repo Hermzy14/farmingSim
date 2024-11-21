@@ -1,9 +1,12 @@
 package no.ntnu.greenhouse;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.net.Socket;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 
@@ -15,6 +18,10 @@ public class GreenhouseSimulator {
 
   private final List<PeriodicSwitch> periodicSwitches = new LinkedList<>();
   private final boolean fake;
+  public static final int TCP_PORT = 9057;
+  private ServerSocket serverSocket;
+  private boolean running;
+  private Socket clientSocket;
 
   /**
    * Create a greenhouse simulator.
@@ -65,8 +72,53 @@ public class GreenhouseSimulator {
     }
   }
 
+  /**
+   * Start the real communication with the greenhouse.
+   */
   private void initiateRealCommunication() {
     // TODO - here you can set up the TCP or UDP communication
+    if (openListeningSocket()) {
+      this.running = true;
+      while (this.running) {
+        clientSocket = acceptNextClient();
+        if (clientSocket != null) {
+          Logger.info("Accepted new client connection: " + clientSocket.getInetAddress());
+        }
+      }
+    }
+    System.out.println("Greenhouse server turning off...");
+  }
+
+  /**
+   * Open a listening TCP socket.
+   *
+   * @return {@code true} on success, {@code false} on error.
+   */
+  private boolean openListeningSocket(){
+    boolean success = false;
+    try {
+      this.serverSocket = new ServerSocket(this.TCP_PORT);
+      success = true;
+    } catch (IOException e) {
+      System.err.println("Could not open a listening socket on port " + TCP_PORT
+          + ", reason: " + e.getMessage());
+    }
+    return success;
+  }
+
+  /**
+   * Accepts the next client and returns the socket.
+   *
+   * @return the socket of the client.
+   */
+  private Socket acceptNextClient() {
+    Socket clientSocket = null;
+    try {
+      clientSocket = this.serverSocket.accept();
+    } catch (IOException e) {
+      System.err.println("Could not accept the next client: " + e.getMessage());
+    }
+    return clientSocket;
   }
 
   private void initiateFakePeriodicSwitches() {
@@ -91,6 +143,7 @@ public class GreenhouseSimulator {
       }
     } else {
       // TODO - here you stop the TCP/UDP communication
+
     }
   }
 
