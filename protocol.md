@@ -73,6 +73,35 @@ them here.
 TODO - describe the general format of all messages. Then describe specific format for each 
 message type in your protocol.
 
+We are going to have two main message categories: Sensor messages and Command messages.
+
+1. SENSOR_DATA (pull sensor data)
+   - Request: The control panel sends a REQUEST_SENSOR_DATA message to a sensor node.
+   - Response: The sensor node replies with a SENSOR_DATA message.
+2. ACTUATOR_STATUS (pull actuator state)
+   - Request: The control panel sends a REQUEST_ACTUATOR_STATUS message.
+   - Response: The actuator replies with an ACTUATOR_STATUS message. 
+3. COMMAND_TO_ACTUATOR (push command, optional pull acknowledgment)
+   - Push command: the control panel sends a COMMAND_TO_ACTUATOR message.
+   - Pull Acknowledgment: The control panel sends a REQUEST_COMMAND_ACK message.
+   - Response: the actuator replies with an ACK message indicating whether the command was received and executed.
+4. BROADCAST_MESSAGE (pull for broadcast updates)
+   - Request: The node sends a REQUEST_BROADCAST_UPDATE message with the topic ID.
+   - Response: the control panel responds with the latest BORADCAST_MESSAGE.
+5. ACK (acknowledgment on demand)
+   - Request: The control panel sends a REQUEST_ACK message with a specific message ID.
+   - Response: The recipient node replies with an ACK.
+
+For marshalling we will use TLV (Type-Lenght-Value) format. TLV is felxible and extensible, which is especially useful 
+for future protocol upgrades.
+
+TLV structure:
+- Message Type: 1 byte: Defines the message category.
+- Lenght: 2 bytes: Lenght of the value field.
+- Node ID: 4 bytes: Unique identifier for the sender/recipient node.
+- Timestamp: 4 bytes: Unix timestamp.
+- Value: Variable The actual payload
+
 ### Error messages
 
 TODO - describe the possible error messages that nodes can send in your system.
