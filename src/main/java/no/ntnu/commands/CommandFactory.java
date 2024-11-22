@@ -13,7 +13,7 @@ public class CommandFactory {
    * @return The parsed command
    * @throws MessageFormatException If the message is not a valid command
    */
-  public static Command parseCommand(String message) throws MessageFormatException {
+  public Command parseCommand(String message) throws MessageFormatException {
     String[] parts = message.split(" ");
     if (parts.length < 1) {
       throw new MessageFormatException("Message is empty");

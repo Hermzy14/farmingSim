@@ -6,7 +6,7 @@ package no.ntnu.commands;
  * <p>When a control panel node wants to get the latest status of an actuator from a node, it sends
  * this command to the node.
  */
-public class RequestActuatorStatus implements Command {
+public class RequestActuatorStatus extends Command {
   private final int nodeId;
 
   /**
