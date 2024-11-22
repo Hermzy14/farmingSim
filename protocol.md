@@ -20,13 +20,13 @@ UDP because of the superior reliability. We believe it is more important for thi
 transfer instead of prioritizing speed and efficiency.
 
 ## The architecture
-We have defined the control-panel nodes as the clients and the sensor/actuator nodes as the servers.
+We have defined the sensor/actuator nodes as the clients and the control-panel nodes as the servers.
 - The control-panel nodes will initiate communication to request sensor data or send control commands to sensor/actuator nodes.
-- The sensor/actuator nodes will respond to client requests by providing sensor data or executing commands sent by the control-panel nodes.
+- The sensor/actuator nodes will respond to server requests by providing sensor data or executing commands sent by the control-panel nodes.
 
 The different nodes:
-1. Sensor/Actuator nodes.
-2. Control-Panel nodes.
+1. Control-Panel nodes.
+2. Sensor/Actuator nodes.
 
 The sensor/actuator nodes collect data from sensors like temperature or humidity sensors, 
 and control actuators like fans and heaters. The control-panel nodes act as user interfaces 
@@ -41,7 +41,7 @@ This is a simple approach that works well for less frequent updates of sensor da
 ## Connection and state
 Our communication protocol is connection-oriented and stateful. This is because we want to keep track of the state of the
 sensor/actuator nodes and the control-panel nodes. This is important for the control-panel nodes to know which sensor/actuator
-nodes are available and what their current state is. It being a connection-oriented protocol will provide is with a 
+nodes are available and what their current state is. It being a connection-oriented protocol will provide us with a 
 possibility for good error handling and ensuring data integrity.
 
 ## Types, constants
@@ -77,7 +77,7 @@ TLV structure:
 - Lenght: 2 bytes: Lenght of the value field.
 - Node ID: 4 bytes: Unique identifier for the sender/recipient node.
 - Timestamp: 4 bytes: Unix timestamp.
-- Value: Variable The actual payload
+- Value: Variable: The actual payload
 
 ### Error messages
 1. **MessageFormatError**:
