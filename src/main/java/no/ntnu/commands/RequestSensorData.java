@@ -6,7 +6,7 @@ package no.ntnu.commands;
  * <p>When a control panel node wants to get the latest sensor data from a sensor node, it sends
  * this command to the sensor node.
  */
-public class RequestSensorData implements Command {
+public class RequestSensorData extends Command {
   private final int nodeId;
 
   /**

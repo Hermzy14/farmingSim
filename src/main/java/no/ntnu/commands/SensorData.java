@@ -6,7 +6,7 @@ package no.ntnu.commands;
  * <p>When a sensor node has new sensor data, it sends this command to the control panel node.
  * The control panel node will then update the GUI with the new sensor data.
  */
-public class SensorData implements Command {
+public class SensorData extends Command {
   private final int nodeId;
   private final int temperature;
   private final int humidity;

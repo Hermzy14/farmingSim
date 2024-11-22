@@ -6,7 +6,7 @@ package no.ntnu.commands;
  * <p>When a control panel node wants to request an acknowledgment for a command, it sends this
  * command to the node.
  */
-public class RequestCommandAck implements Command {
+public class RequestCommandAck extends Command {
   private final int commandId;
 
   /**

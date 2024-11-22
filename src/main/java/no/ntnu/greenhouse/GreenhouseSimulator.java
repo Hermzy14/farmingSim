@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.net.Socket;
+import no.ntnu.controlpanel.ClientHandler;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 
@@ -83,6 +84,8 @@ public class GreenhouseSimulator {
         clientSocket = acceptNextClient();
         if (clientSocket != null) {
           Logger.info("Accepted new client connection: " + clientSocket.getInetAddress());
+          ClientHandler clientHandler = new ClientHandler(this, clientSocket);
+          clientHandler.run();
         }
       }
     }

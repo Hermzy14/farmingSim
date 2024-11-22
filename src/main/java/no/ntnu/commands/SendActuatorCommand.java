@@ -6,7 +6,7 @@ package no.ntnu.commands;
  * <p>When a control panel node wants to send an actuator command to a node, it sends this command to
  * the node.
  */
-public class SendActuatorCommand implements Command {
+public class SendActuatorCommand extends Command {
   private final int nodeId;
   private final int command;
 
