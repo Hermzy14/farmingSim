@@ -46,8 +46,21 @@ possibility for good error handling and ensuring data integrity.
 
 ## Types, constants
 
-TODO - Do you have some specific value types you use in several messages? They you can describe 
+TODO - Do you have some specific value types you use in several messages? Then you can describe 
 them here.
+
+We have set specific values for the different message types. These are used to identify the type of message that is being sent.
+Message Type Values:
+- SENSOR_DATA = 0x01
+- ACTUATOR_STATUS = 0x02
+- COMMAND_TO_ACTUATOR = 0x03
+- ACK = 0x04
+- REQUEST_SENSOR_DATA = 0x05
+- REQUEST_ACTUATOR_STATUS = 0x06
+- REQUEST_COMMAND_ACK = 0x07
+- REQUEST_ACK = 0x08
+
+
 
 ## Message format
 We are going to have two main message categories: Sensor messages and Command messages.
