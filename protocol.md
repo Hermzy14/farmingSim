@@ -1,8 +1,9 @@
 # Candidate mapping
-MilkDirt
-Hermzy14
-mustafyu
-Dennij 
+This is a list of the candidates with their github usernames and candidate numbers.
+MilkDirt =
+Hermzy14 =
+mustafyu =
+Dennij =
 
 # Communication protocol
 This document describes the protocol used for communication between the different nodes of the
