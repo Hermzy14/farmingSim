@@ -33,7 +33,7 @@ public class ControlPanelStarter {
   public static void main(String[] args) {
     boolean fake = false;// make it true to test in fake mode
     if (args.length == 1 && "fake".equals(args[0])) {
-      fake = true;
+      //fake = true;
       Logger.info("Using FAKE events");
     }
     ControlPanelStarter starter = new ControlPanelStarter(fake);
@@ -63,18 +63,19 @@ public class ControlPanelStarter {
     // TODO - here you initiate TCP/UDP socket communication
     // You communication class(es) may want to get reference to the logic and call necessary
     // logic methods when events happen (for example, when sensor data is received)
-try {
-  // Server IP address and port
-  String host = "127.0.0.1";  // local server
-  int port = 9057;
-  Socket socket = new Socket(host, port);
-
-  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-  out.println("Hello S");
-} catch (Exception e) {
-  System.err.println("Error during socket communication: " + e.getMessage());
-}
-    return null;
+    CommunicationChannel channel = null;
+    try {
+      // Server IP address and port
+      String host = "127.0.0.1";  // local server
+      int port = 9057;
+      Socket socket = new Socket(host, port);
+      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+      out.println("Hello S");
+      channel = new FakeCommunicationChannel(logic); // TODO - replace with real communication
+    } catch (Exception e) {
+      System.err.println("Error during socket communication: " + e.getMessage());
+    }
+    return channel;
   }
 
   private CommunicationChannel initiateFakeSpawner(ControlPanelLogic logic) {
@@ -85,7 +86,8 @@ try {
     spawner.spawnNode("4;3_window", START_DELAY);
     spawner.spawnNode("1", START_DELAY + 1);
     spawner.spawnNode("1", START_DELAY + 2);
-    spawner.advertiseSensorData("4;temperature=27.4 °C,temperature=26.8 °C,humidity=80 %", START_DELAY + 2);
+    spawner.advertiseSensorData("4;temperature=27.4 °C,temperature=26.8 °C,humidity=80 %",
+        START_DELAY + 2);
     spawner.spawnNode("8;2_heater", START_DELAY + 3);
     spawner.advertiseActuatorState(4, 1, true, START_DELAY + 3);
     spawner.advertiseActuatorState(4, 1, false, START_DELAY + 4);
@@ -95,13 +97,17 @@ try {
     spawner.advertiseActuatorState(4, 2, false, START_DELAY + 6);
     spawner.advertiseActuatorState(4, 1, true, START_DELAY + 7);
     spawner.advertiseActuatorState(4, 2, true, START_DELAY + 8);
-    spawner.advertiseSensorData("4;temperature=22.4 °C,temperature=26.0 °C,humidity=81 %", START_DELAY + 9);
+    spawner.advertiseSensorData("4;temperature=22.4 °C,temperature=26.0 °C,humidity=81 %",
+        START_DELAY + 9);
     spawner.advertiseSensorData("1;humidity=80 %,humidity=82 %", START_DELAY + 10);
     spawner.advertiseRemovedNode(8, START_DELAY + 11);
     spawner.advertiseRemovedNode(8, START_DELAY + 12);
-    spawner.advertiseSensorData("1;temperature=25.4 °C,temperature=27.0 °C,humidity=67 %", START_DELAY + 13);
-    spawner.advertiseSensorData("4;temperature=25.4 °C,temperature=27.0 °C,humidity=82 %", START_DELAY + 14);
-    spawner.advertiseSensorData("4;temperature=25.4 °C,temperature=27.0 °C,humidity=82 %", START_DELAY + 16);
+    spawner.advertiseSensorData("1;temperature=25.4 °C,temperature=27.0 °C,humidity=67 %",
+        START_DELAY + 13);
+    spawner.advertiseSensorData("4;temperature=25.4 °C,temperature=27.0 °C,humidity=82 %",
+        START_DELAY + 14);
+    spawner.advertiseSensorData("4;temperature=25.4 °C,temperature=27.0 °C,humidity=82 %",
+        START_DELAY + 16);
     return spawner;
   }
 
