@@ -102,7 +102,7 @@ TLV structure:
 
 ## An example scenario
 1.  Sensor Node ID= 1 is started:
-- It initializes its sesors(1 temprature senor, 2 humidity sensors) and its actuator (a window)
+- It initializes its sensors(1 temperature sensor, 2 humidity sensors) and its actuator (a window)
 - It establishes a TCP connection with the control panel and send a registration packet.
 2. Sensor Node ID=2 is started:
 - It initializes its sensors (1 temperature sensor) and actuators (2 fans and a heater). 
@@ -116,8 +116,8 @@ TLV structure:
 5. Sensor Node ID=3 is started:
 - It initializes its sensors (2 temperature sensors) with no actuators.
 - It establishes a connection and registers
-6. Broadcasting sensor data:
-- Command panel request data from seonsor nodes.
+6. Request sensor data:
+- Command panel request data from sensor nodes.
 - 10 seconds after initialization, all three sensor nodes broadcast their current sensor data to the control panels.
 7.   User interaction with control panel 1:
 - The user of Control Panel 1 presses a button to turn on the first fan of Sensor Node ID=2.
