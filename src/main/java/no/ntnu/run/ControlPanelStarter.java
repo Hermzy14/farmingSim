@@ -17,6 +17,8 @@ import java.net.Socket;
 public class ControlPanelStarter {
   private final boolean fake;
 
+  private Socket socket;
+
   public ControlPanelStarter(boolean fake) {
     this.fake = fake;
   }
@@ -68,7 +70,7 @@ public class ControlPanelStarter {
       // Server IP address and port
       String host = "127.0.0.1";  // local server
       int port = 9057;
-      Socket socket = new Socket(host, port);
+      this.socket = new Socket(host, port);
       PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
       out.println("Hello S");
       channel = new FakeCommunicationChannel(logic); // TODO - replace with real communication
@@ -87,7 +89,7 @@ public class ControlPanelStarter {
     spawner.spawnNode("1", START_DELAY + 1);
     spawner.spawnNode("1", START_DELAY + 2);
     spawner.advertiseSensorData("4;temperature=27.4 °C,temperature=26.8 °C,humidity=80 %",
-        START_DELAY + 2);
+      START_DELAY + 2);
     spawner.spawnNode("8;2_heater", START_DELAY + 3);
     spawner.advertiseActuatorState(4, 1, true, START_DELAY + 3);
     spawner.advertiseActuatorState(4, 1, false, START_DELAY + 4);
@@ -98,20 +100,28 @@ public class ControlPanelStarter {
     spawner.advertiseActuatorState(4, 1, true, START_DELAY + 7);
     spawner.advertiseActuatorState(4, 2, true, START_DELAY + 8);
     spawner.advertiseSensorData("4;temperature=22.4 °C,temperature=26.0 °C,humidity=81 %",
-        START_DELAY + 9);
+      START_DELAY + 9);
     spawner.advertiseSensorData("1;humidity=80 %,humidity=82 %", START_DELAY + 10);
     spawner.advertiseRemovedNode(8, START_DELAY + 11);
     spawner.advertiseRemovedNode(8, START_DELAY + 12);
     spawner.advertiseSensorData("1;temperature=25.4 °C,temperature=27.0 °C,humidity=67 %",
-        START_DELAY + 13);
+      START_DELAY + 13);
     spawner.advertiseSensorData("4;temperature=25.4 °C,temperature=27.0 °C,humidity=82 %",
-        START_DELAY + 14);
+      START_DELAY + 14);
     spawner.advertiseSensorData("4;temperature=25.4 °C,temperature=27.0 °C,humidity=82 %",
-        START_DELAY + 16);
+      START_DELAY + 16);
     return spawner;
   }
 
   private void stopCommunication() {
     // TODO - here you stop the TCP/UDP socket communication
+    if (socket != null && !socket.isClosed()) {
+      try {
+        socket.close();
+        Logger.info("Socket communicaton closed");
+      } catch (Exception e) {
+        System.err.println("Error during closing TCP socket communication: " + e.getMessage());
+      }
+    }
   }
 }
