@@ -1,3 +1,9 @@
+# Candidate mapping
+MilkDirt
+Hermzy14
+mustafyu
+Dennij 
+
 # Communication protocol
 This document describes the protocol used for communication between the different nodes of the
 distributed application.
