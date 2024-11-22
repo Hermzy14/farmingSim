@@ -62,12 +62,19 @@ We are going to have two main message categories: Sensor messages and Command me
    - Push command: the control panel sends a COMMAND_TO_ACTUATOR message.
    - Pull Acknowledgment: The control panel sends a REQUEST_COMMAND_ACK message.
    - Response: the actuator replies with an ACK message indicating whether the command was received and executed.
-4. BROADCAST_MESSAGE (pull for broadcast updates)
-   - Request: The node sends a REQUEST_BROADCAST_UPDATE message with the topic ID.
-   - Response: the control panel responds with the latest BORADCAST_MESSAGE.
-5. ACK (acknowledgment on demand)
+4. ACK (acknowledgment on demand)
    - Request: The control panel sends a REQUEST_ACK message with a specific message ID.
    - Response: The recipient node replies with an ACK.
+
+Message Type Values:
+- SENSOR_DATA = 0x01
+- ACTUATOR_STATUS = 0x02
+- COMMAND_TO_ACTUATOR = 0x03
+- ACK = 0x04
+- REQUEST_SENSOR_DATA = 0x05
+- REQUEST_ACTUATOR_STATUS = 0x06
+- REQUEST_COMMAND_ACK = 0x07
+- REQUEST_ACK = 0x08
 
 For marshalling we will use TLV (Type-Lenght-Value) format. TLV is felxible and extensible, which is especially useful 
 for future protocol upgrades.
