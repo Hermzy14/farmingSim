@@ -6,6 +6,9 @@ import no.ntnu.controlpanel.FakeCommunicationChannel;
 import no.ntnu.gui.controlpanel.ControlPanelApplication;
 import no.ntnu.tools.Logger;
 
+import java.io.PrintWriter;
+import java.net.Socket;
+
 /**
  * Starter class for the control panel.
  * Note: we could launch the Application class directly, but then we would have issues with the
@@ -60,6 +63,17 @@ public class ControlPanelStarter {
     // TODO - here you initiate TCP/UDP socket communication
     // You communication class(es) may want to get reference to the logic and call necessary
     // logic methods when events happen (for example, when sensor data is received)
+try {
+  // Server IP address and port
+  String host = "127.0.0.1";  // local server
+  int port = 9057;
+  Socket socket = new Socket(host, port);
+
+  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+  out.println("Hello S");
+} catch (Exception e) {
+  System.err.println("Error during socket communication: " + e.getMessage());
+}
     return null;
   }
 
