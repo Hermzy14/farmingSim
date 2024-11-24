@@ -84,9 +84,9 @@ public class ClientHandler {
       shouldContinue = false;
     } else {
       try {
-        //Command cmd = factory.parseCommand(command);
-        //response = cmd.execute(client);
-        response = "Command not implemented"; //TODO: Implement command execution
+        Command cmd = factory.parseCommand(command);
+        response = cmd.execute(client);
+        //response = "Command not implemented"; //TODO: Implement command execution
       } catch (Exception e) {
         response = "ERROR: " + e.getMessage();
       }

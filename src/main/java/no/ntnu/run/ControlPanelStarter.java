@@ -81,8 +81,8 @@ public class ControlPanelStarter {
       this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
       this.objectWriter = new ObjectOutputStream(this.socket.getOutputStream());
       System.out.println("Connection established!");
-      channel = new RealCommunicationChannel(logic); // TODO - replace with real communication
-      sendAndReceive("test melding"); //TODO - remove after testing
+      channel = new RealCommunicationChannel(logic);
+      sendAndReceive("0x01 1"); //TODO - remove after testing, should be done by the GUI
     } catch (IOException e) {
       System.err.println("Error on connection: " + e.getMessage());
     }
