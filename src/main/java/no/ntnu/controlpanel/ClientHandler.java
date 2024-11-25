@@ -1,21 +1,18 @@
 package no.ntnu.controlpanel;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import no.ntnu.commands.Command;
 import no.ntnu.commands.CommandFactory;
-import no.ntnu.exceptions.MessageFormatException;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.tools.Logger;
 
 /**
  * Handles communication with TCP clients.
  */
-public class ClientHandler {
+public class ClientHandler implements Runnable {
   private final GreenhouseSimulator client;
   private final Socket clientSocket;
   private ObjectInputStream objectReader;
@@ -32,6 +29,7 @@ public class ClientHandler {
   /**
    * Runs the client handler.
    */
+  @Override
   public void run() {
     if (establishStreams()) {
       handleClientRequest();
@@ -80,13 +78,12 @@ public class ClientHandler {
     System.out.println("Command from the client: " + command);
     String response = null;
 
-    if (command == null) {
+    if (command == null || command.isEmpty()) {
       shouldContinue = false;
     } else {
       try {
         Command cmd = factory.parseCommand(command);
         response = cmd.execute(client);
-        //response = "Command not implemented"; //TODO: Implement command execution
       } catch (Exception e) {
         response = "ERROR: " + e.getMessage();
       }
