@@ -70,4 +70,19 @@ public class RealCommunicationChannel implements CommunicationChannel {
       Logger.error("Error while closing the connection: " + e.getMessage());
     }
   }
+
+  /**
+   * Receive a response from the server.
+   */
+  public String receiveResponse() throws IOException {
+    return this.reader.readLine();
+  }
+
+  /**
+   * Send a command to the server.
+   */
+  public void sendCommand(String command) throws IOException {
+    this.objectWriter.writeObject(command);
+    this.objectWriter.flush();
+  }
 }

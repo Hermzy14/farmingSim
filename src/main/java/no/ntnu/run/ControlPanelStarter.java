@@ -52,6 +52,7 @@ public class ControlPanelStarter {
   private void start() {
     ControlPanelLogic logic = new ControlPanelLogic();
     CommunicationChannel channel = initiateCommunication(logic, fake);
+    sendAndReceive((RealCommunicationChannel) channel, "0x01 1");
     ControlPanelApplication.startApp(logic, channel);
     // This code is reached only after the GUI-window is closed
     Logger.info("Exiting the control panel application");
@@ -81,40 +82,23 @@ public class ControlPanelStarter {
     return channel;
   }
 
-//  /**
-//   * Sends and receives command.
-//   *
-//   * @param command command received.
-//   */
-//  public void sendAndReceive(String command) {
-//    if (sendToServer(command)) {
-//      String response = receiveResponse();
-//      if (response != null) {
-//        System.out.println("Client's response: " + response);
-//      }
-//    }
-//  }
-//
-//  private boolean sendToServer(String command) {
-//    boolean success = false;
-//    try {
-//      this.objectWriter.writeObject(command);
-//      success = true;
-//    } catch (Exception e) {
-//      Logger.error("Error while sending the message: " + e.getMessage());
-//    }
-//    return success;
-//  }
-//
-//  private String receiveResponse() {
-//    String response = null;
-//    try {
-//      response = this.reader.readLine();
-//    } catch (IOException e) {
-//      Logger.error("Error while receiving data from the server: " + e.getMessage());
-//    }
-//    return response;
-//  }
+  /**
+   * Send a command and receive a response.
+   *
+   * @param channel The communication channel
+   * @param command The command to send
+   */
+  public void sendAndReceive(RealCommunicationChannel channel, String command) {
+    try {
+      channel.sendCommand(command);
+      String response = channel.receiveResponse();
+      if (response != null) {
+        Logger.info("Received response: " + response);
+      }
+    } catch (IOException e) {
+      Logger.error("Error while sending/receiving command: " + e.getMessage());
+    }
+  }
 
   private CommunicationChannel initiateFakeSpawner(ControlPanelLogic logic) {
     // Here we pretend that some events will be received with a given delay
@@ -150,7 +134,6 @@ public class ControlPanelStarter {
   }
 
   private void stopCommunication(CommunicationChannel channel) {
-    // TODO - here you stop the TCP/UDP socket communication
     try {
       if (channel != null) {
         ((RealCommunicationChannel) channel).close();
