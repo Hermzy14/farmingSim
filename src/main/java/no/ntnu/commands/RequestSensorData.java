@@ -1,7 +1,9 @@
 package no.ntnu.commands;
 
-import no.ntnu.exceptions.MessageFormatException;
+import java.util.List;
 import no.ntnu.greenhouse.GreenhouseSimulator;
+import no.ntnu.greenhouse.Sensor;
+import no.ntnu.greenhouse.SensorActuatorNode;
 
 /**
  * Command to request sensor data from a node.
@@ -32,6 +34,24 @@ public class RequestSensorData extends Command {
 
   @Override
   public String execute(GreenhouseSimulator greenhouse) {
-    throw new IllegalArgumentException("Not implemented"); // TODO: Implement
+    //throw new IllegalArgumentException("Not implemented"); // TODO: Implement
+    StringBuilder sb;
+    try {
+      SensorActuatorNode node = greenhouse.getSensorNode(nodeId);
+      if (node == null) {
+        return "Node not found";
+      }
+      List<Sensor> sensors = node.getSensors();
+      sb = new StringBuilder();
+      for (Sensor sensor : sensors) {
+        sb.append(sensor.getReading().getFormatted());
+        sb.append(", ");
+      }
+    } catch (Exception e) {
+      sb = new StringBuilder();
+      sb.append("Error executing RequestSensorData: ");
+      sb.append(e.getMessage());
+    }
+    return sb.toString();
   }
 }

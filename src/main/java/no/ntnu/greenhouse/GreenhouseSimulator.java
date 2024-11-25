@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.net.Socket;
 import no.ntnu.controlpanel.ClientHandler;
+import no.ntnu.controlpanel.SensorActuatorNodeInfo;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 
@@ -169,5 +170,17 @@ public class GreenhouseSimulator {
     for (SensorActuatorNode node : nodes.values()) {
       node.addStateListener(listener);
     }
+  }
+
+  /**
+   * Return a sensor/actuator node by its ID.
+   *
+   * @return The node with the given ID, or {@code null} if not found
+   */
+  public SensorActuatorNode getSensorNode(int nodeId) {
+    if (!nodes.containsKey(nodeId)) {
+      throw new IllegalArgumentException("Node with ID " + nodeId + " not found");
+    }
+    return nodes.get(nodeId);
   }
 }

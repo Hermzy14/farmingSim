@@ -1,10 +1,13 @@
 package no.ntnu.controlpanel;
 
+import static no.ntnu.tools.Parser.parseIntegerOrError;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.tools.Logger;
 
