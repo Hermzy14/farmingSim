@@ -146,13 +146,16 @@ public class GreenhouseSimulator {
         periodicSwitch.stop();
       }
     } else {
-      // TODO - here you stop the TCP/UDP communication
+      this.running = false;
       try {
-        if (serverSocket != null && !serverSocket.isClosed()) {
+        if (clientSocket != null) {
+          clientSocket.close();
+        }
+        if (serverSocket != null) {
           serverSocket.close();
         }
       } catch (IOException e) {
-        Logger.error("Error while closing the server socket: " + e.getMessage());
+        System.err.println("Error while closing the communication: " + e.getMessage());
       }
     }
   }

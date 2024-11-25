@@ -43,7 +43,6 @@ public class ControlPanelStarter {
     ControlPanelLogic logic = new ControlPanelLogic();
     CommunicationChannel channel = initiateCommunication(logic, fake);
     ControlPanelApplication.startApp(logic, channel);
-    sendAndReceive((RealCommunicationChannel) channel, "0x01 1");
     // This code is reached only after the GUI-window is closed
     Logger.info("Exiting the control panel application");
     stopCommunication(channel);
