@@ -1,22 +1,12 @@
 package no.ntnu.run;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import no.ntnu.commands.Command;
-import no.ntnu.commands.CommandAck;
-import no.ntnu.commands.RequestSensorData;
 import no.ntnu.controlpanel.CommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.FakeCommunicationChannel;
 import no.ntnu.controlpanel.RealCommunicationChannel;
-import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.gui.controlpanel.ControlPanelApplication;
 import no.ntnu.tools.Logger;
-
-import java.io.PrintWriter;
-import java.net.Socket;
 
 /**
  * Starter class for the control panel.

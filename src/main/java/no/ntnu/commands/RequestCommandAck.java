@@ -1,5 +1,7 @@
 package no.ntnu.commands;
 
+import no.ntnu.greenhouse.GreenhouseSimulator;
+
 /**
  * Command to request an acknowledgment for a command.
  *
@@ -25,5 +27,10 @@ public class RequestCommandAck extends Command {
    */
   public int getCommandId() {
     return commandId;
+  }
+
+  @Override
+  public String execute(GreenhouseSimulator greenhouse) {
+    throw new IllegalArgumentException("Not implemented"); // TODO: Implement
   }
 }

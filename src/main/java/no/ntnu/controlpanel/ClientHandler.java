@@ -75,7 +75,7 @@ public class ClientHandler implements Runnable {
   private boolean handleCommand(String command) {
     boolean shouldContinue = true;
     CommandFactory factory = new CommandFactory();
-    System.out.println("Command from the client: " + command);
+    Logger.info("Command from the client: " + command);
     String response = null;
 
     if (command == null || command.isEmpty()) {

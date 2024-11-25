@@ -1,5 +1,7 @@
 package no.ntnu.commands;
 
+import no.ntnu.greenhouse.GreenhouseSimulator;
+
 /**
  * Command to request the status of an actuator from a node.
  *
@@ -26,4 +28,9 @@ public class RequestActuatorStatus extends Command {
   public int getNodeId() {
     return nodeId;
   }
+
+    @Override
+    public String execute(GreenhouseSimulator greenhouse) {
+        throw new IllegalArgumentException("Not implemented"); // TODO: Implement
+    }
 }

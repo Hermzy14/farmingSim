@@ -1,5 +1,7 @@
 package no.ntnu.commands;
 
+import no.ntnu.greenhouse.GreenhouseSimulator;
+
 /**
  * Command to send an actuator command to a node. This could be to turn on a light, open a window, etc.
  *
@@ -37,5 +39,10 @@ public class SendActuatorCommand extends Command {
    */
   public int getCommand() {
     return this.command;
+  }
+
+  @Override
+  public String execute(GreenhouseSimulator greenhouse) {
+    throw new IllegalArgumentException("Not implemented"); //TODO: Implement
   }
 }

@@ -7,8 +7,11 @@ import no.ntnu.greenhouse.GreenhouseSimulator;
  * All commands must implement this interface.
  */
 public abstract class Command {
-  public String execute(GreenhouseSimulator greenhouse) {
-    //TODO: Implement this method so that it can be used to execute the command on the given greenhouse
-    return "Command executed on: " + greenhouse;
-  }
+  /**
+   * Execute the command.
+   *
+   * @param greenhouse The greenhouse simulator to execute the command on.
+   * @return A string response to the command.
+   */
+  public abstract String execute(GreenhouseSimulator greenhouse);
 }

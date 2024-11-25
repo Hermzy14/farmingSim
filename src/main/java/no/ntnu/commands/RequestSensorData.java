@@ -1,5 +1,8 @@
 package no.ntnu.commands;
 
+import no.ntnu.exceptions.MessageFormatException;
+import no.ntnu.greenhouse.GreenhouseSimulator;
+
 /**
  * Command to request sensor data from a node.
  *
@@ -25,5 +28,10 @@ public class RequestSensorData extends Command {
    */
   public int getNodeId() {
     return nodeId;
+  }
+
+  @Override
+  public String execute(GreenhouseSimulator greenhouse) {
+    throw new IllegalArgumentException("Not implemented"); // TODO: Implement
   }
 }
