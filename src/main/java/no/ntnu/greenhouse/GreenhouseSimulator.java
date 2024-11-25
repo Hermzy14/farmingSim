@@ -77,19 +77,20 @@ public class GreenhouseSimulator {
    * Start the real communication with the greenhouse.
    */
   private void initiateRealCommunication() {
-    // TODO - here you can set up the TCP or UDP communication
-    if (openListeningSocket()) {
-      this.running = true;
-      while (this.running) {
-        clientSocket = acceptNextClient();
-        if (clientSocket != null) {
-          Logger.info("Accepted new client connection: " + clientSocket.getInetAddress());
-          ClientHandler clientHandler = new ClientHandler(this, clientSocket);
-          clientHandler.run();
+    new Thread(() -> {
+      if (openListeningSocket()) {
+        this.running = true;
+        while (this.running) {
+          clientSocket = acceptNextClient();
+          if (clientSocket != null) {
+            Logger.info("Accepted new client connection: " + clientSocket.getInetAddress());
+            ClientHandler clientHandler = new ClientHandler(this, clientSocket);
+            clientHandler.run();
+          }
         }
       }
-    }
-    System.out.println("Greenhouse server turning off...");
+      System.out.println("Greenhouse server turning off...");
+    }).start();
   }
 
   /**
