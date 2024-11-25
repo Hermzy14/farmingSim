@@ -25,10 +25,6 @@ import java.net.Socket;
  */
 public class ControlPanelStarter {
   private final boolean fake;
-  private static final String HOST = "localhost";
-  private Socket socket;
-  private BufferedReader reader;
-  private ObjectOutputStream objectWriter;
 
   public ControlPanelStarter(boolean fake) {
     this.fake = fake;
@@ -59,7 +55,7 @@ public class ControlPanelStarter {
     ControlPanelApplication.startApp(logic, channel);
     // This code is reached only after the GUI-window is closed
     Logger.info("Exiting the control panel application");
-    stopCommunication();
+    stopCommunication(channel);
   }
 
   private CommunicationChannel initiateCommunication(ControlPanelLogic logic, boolean fake) {
@@ -75,54 +71,50 @@ public class ControlPanelStarter {
   private CommunicationChannel initiateSocketCommunication(ControlPanelLogic logic) {
     // You communication class(es) may want to get reference to the logic and call necessary
     // logic methods when events happen (for example, when sensor data is received)
-    CommunicationChannel channel = null;
-    try {
-      this.socket = new Socket(HOST, GreenhouseSimulator.TCP_PORT);
-      this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-      this.objectWriter = new ObjectOutputStream(this.socket.getOutputStream());
-      System.out.println("Connection established!");
-      channel = new RealCommunicationChannel(logic);
-      sendAndReceive("0x01 1"); //TODO - remove after testing, should be done by the GUI
-    } catch (IOException e) {
-      System.err.println("Error on connection: " + e.getMessage());
+    RealCommunicationChannel channel = new RealCommunicationChannel(logic);
+    logic.setCommunicationChannel(channel);
+    if (channel.open()) {
+      Logger.info("Communication channel opened");
+    } else {
+      Logger.error("Failed to open the communication channel");
     }
     return channel;
   }
 
-  /**
-   * Sends and receives command.
-   *
-   * @param command command received.
-   */
-  public void sendAndReceive(String command) {
-    if (sendToServer(command)) {
-      String response = receiveResponse();
-      if (response != null) {
-        System.out.println("Client's response: " + response);
-      }
-    }
-  }
-
-  private boolean sendToServer(String command) {
-    boolean success = false;
-    try {
-      this.objectWriter.writeObject(command);
-      success = true;
-    } catch (Exception e) {
-      Logger.error("Error while sending the message: " + e.getMessage());
-    }
-    return success;
-  }
-
-  private String receiveResponse() {
-    String response = null;
-    try {
-      response = this.reader.readLine();
-    } catch (IOException e) {
-      Logger.error("Error while receiving data from the server: " + e.getMessage());
-    }
-    return response;
-  }
+//  /**
+//   * Sends and receives command.
+//   *
+//   * @param command command received.
+//   */
+//  public void sendAndReceive(String command) {
+//    if (sendToServer(command)) {
+//      String response = receiveResponse();
+//      if (response != null) {
+//        System.out.println("Client's response: " + response);
+//      }
+//    }
+//  }
+//
+//  private boolean sendToServer(String command) {
+//    boolean success = false;
+//    try {
+//      this.objectWriter.writeObject(command);
+//      success = true;
+//    } catch (Exception e) {
+//      Logger.error("Error while sending the message: " + e.getMessage());
+//    }
+//    return success;
+//  }
+//
+//  private String receiveResponse() {
+//    String response = null;
+//    try {
+//      response = this.reader.readLine();
+//    } catch (IOException e) {
+//      Logger.error("Error while receiving data from the server: " + e.getMessage());
+//    }
+//    return response;
+//  }
 
   private CommunicationChannel initiateFakeSpawner(ControlPanelLogic logic) {
     // Here we pretend that some events will be received with a given delay
@@ -157,7 +149,15 @@ public class ControlPanelStarter {
     return spawner;
   }
 
-  private void stopCommunication() {
+  private void stopCommunication(CommunicationChannel channel) {
     // TODO - here you stop the TCP/UDP socket communication
+    try {
+      if (channel != null) {
+        ((RealCommunicationChannel) channel).close();
+        Logger.info("Socket communication closed successfully.");
+      }
+    } catch (Exception e) {
+      Logger.error("Failed to close socket communication: " + e.getMessage());
+    }
   }
 }

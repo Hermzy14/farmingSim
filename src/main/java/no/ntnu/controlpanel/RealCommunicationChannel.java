@@ -1,5 +1,11 @@
 package no.ntnu.controlpanel;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.tools.Logger;
 
 /**
@@ -8,6 +14,10 @@ import no.ntnu.tools.Logger;
  */
 public class RealCommunicationChannel implements CommunicationChannel {
   private final ControlPanelLogic logic;
+  private Socket socket;
+  private BufferedReader reader;
+  private ObjectOutputStream objectWriter;
+  private static final String HOST = "localhost";
 
   /**
    * Create a new real communication channel.
@@ -28,7 +38,36 @@ public class RealCommunicationChannel implements CommunicationChannel {
 
   @Override
   public boolean open() {
-    // Open the communication channel
-    return true;
+    boolean success = false;
+    try {
+      this.socket = new Socket(HOST, GreenhouseSimulator.TCP_PORT);
+      this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+      this.objectWriter = new ObjectOutputStream(this.socket.getOutputStream());
+      Logger.info("Connection established!");
+      success = true;
+    } catch (IOException e) {
+      Logger.error("Error on connection: " + e.getMessage());
+    }
+    return success;
+  }
+
+  /**
+   * Close the communication channel.
+   */
+  public void close() {
+    try {
+      if (reader != null) {
+        reader.close();
+      }
+      if (objectWriter != null) {
+        objectWriter.close();
+      }
+      if (socket != null && !socket.isClosed()) {
+        socket.close();
+      }
+      Logger.info("Connection closed successfully.");
+    } catch (IOException e) {
+      Logger.error("Error while closing the connection: " + e.getMessage());
+    }
   }
 }
