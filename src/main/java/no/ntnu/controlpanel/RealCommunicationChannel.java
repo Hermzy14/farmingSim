@@ -144,29 +144,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
    */
   public String receiveResponse() throws IOException {
     String response = this.reader.readLine();
-    Logger.info("Received response: " + response);
-    if (response.startsWith("0x01")) {
-      String[] parts = response.split(" ");
-      int nodeId = parseIntegerOrError(parts[1], "Invalid node ID: " + parts[1]);
-      List<SensorReading> readings = parseSensorReadings(parts);
-      handleSensorData(nodeId, readings);
-    }
     return response;
-  }
-
-  private List<SensorReading> parseSensorReadings(String[] parts) {
-    List<SensorReading> readings = new LinkedList<>();
-    for (int i = 2; i < parts.length; i++) {
-      String[] readingParts = parts[i].split(":");
-      if (readingParts.length != 3) {
-        throw new IllegalArgumentException("Invalid sensor reading: " + parts[i]);
-      }
-      String type = readingParts[0];
-      String unit = readingParts[1];
-      double value = Double.parseDouble(readingParts[2].replaceAll("[^\\d.]", ""));
-      readings.add(new SensorReading(type, value, unit));
-    }
-    return readings;
   }
 
   /**
@@ -184,21 +162,5 @@ public class RealCommunicationChannel implements CommunicationChannel {
     } catch (IOException e) {
       Logger.error("Error sending command: " + e.getMessage());
     }
-  }
-
-  /**
-   * Handle sensor data received from the server.
-   */
-  public void handleSensorData(int nodeId, List<SensorReading> readings) {
-    Logger.info("Received sensor data from node " + nodeId + ": " + readings);
-    logic.onSensorData(nodeId, readings);
-  }
-
-  /**
-   * Handle a new node being added to the greenhouse.
-   */
-  public void handleNodeAdded(SensorActuatorNodeInfo nodeInfo) {
-    Logger.info("Node added: " + nodeInfo);
-    logic.onNodeAdded(nodeInfo);
   }
 }

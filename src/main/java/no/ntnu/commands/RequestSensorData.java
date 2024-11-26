@@ -41,20 +41,18 @@ public class RequestSensorData extends Command {
       if (node == null) {
         return "Error: Node not found.";
       }
-      sb.append("0x01 ").append(nodeId).append(" ");
+      sb.append("Readings from node ").append(nodeId).append(": ");
       for (Sensor sensor : node.getSensors()) {
         SensorReading reading = sensor.getReading();
         sb.append(sensor.getType())
-            .append(":")
-            .append(reading != null ? reading.getUnit() : "unknown")
-            .append(":")
+            .append(": ")
             .append(reading != null ? reading.getFormatted() : "N/A")
-            .append(" ");
+            .append(", ");
       }
     } catch (Exception e) {
       sb.append("Error executing RequestSensorData: ").append(e.getMessage());
     }
-    return sb.toString().trim(); // Ensure no trailing spaces
+    return sb.toString().trim();
   }
 
 }
