@@ -45,7 +45,12 @@ public class RealCommunicationChannel implements CommunicationChannel {
 
   @Override
   public boolean open() {
+    int attempt = 1; // Current connection attempt
+    int maxAttempts = 5; // Maximum number of connection attempts
+    int delayBetweenAttempts = 2000; // Delay between connection attempts in milliseconds
     boolean success = false;
+
+    while ((attempt <= maxAttempts) && !success) {
       try {
         this.socket = new Socket(HOST, GreenhouseSimulator.TCP_PORT);
         this.objectWriter = new ObjectOutputStream(this.socket.getOutputStream());
@@ -53,8 +58,23 @@ public class RealCommunicationChannel implements CommunicationChannel {
         this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
         success = true;
       } catch (IOException e) {
-        Logger.error("Error on connection: " + e.getMessage());
+        Logger.error("Connection attempt " + attempt + " failed: " + e.getMessage());
+
+        try {
+          Thread.sleep(delayBetweenAttempts);
+        } catch (InterruptedException ex) {
+          Thread.currentThread().interrupt();
+          break;
+        }
       }
+      attempt++;
+    }
+
+    // Log an error if the connection was not established
+    if (!success) {
+      Logger.error("Failed to establish connection after " + maxAttempts + " attempts");
+    }
+
     return success;
   }
 

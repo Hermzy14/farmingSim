@@ -32,18 +32,19 @@ public class CommandLineControlPanel {
    */
   public static void main(String[] args) {
     CommandLineControlPanel controlPanel = new CommandLineControlPanel();
-    controlPanel.init();
-    controlPanel.run();
+    if (controlPanel.init()) { // Initialize the control panel
+      Logger.success("Control panel initialized successfully!");
+      controlPanel.run(); // Run the control panel if initialization was successful
+    }
   }
 
   /**
    * Initialize the control panel.
    */
-  public void init() {
+  public boolean init() {
     this.controlPanelLogic = new ControlPanelLogic();
     this.communicationChannel = new RealCommunicationChannel(controlPanelLogic);
-    this.communicationChannel.open();
-    //this.communicationChannel.startContinuousCommunication();
+    return this.communicationChannel.open();
   }
 
   /**
@@ -51,7 +52,7 @@ public class CommandLineControlPanel {
    */
   public void run() {
     Logger.info("Running the control panel...");
-    Logger.info("List of available commands:");
+    Logger.info("\nList of available commands:");
     Logger.info("0x01 [nodeId] - Request sensor data from a node - Example node 1: 0x01 1");
     Logger.info("exit - Exit the control panel");
     // TODO: Add more commands
@@ -59,7 +60,7 @@ public class CommandLineControlPanel {
     this.running = true;
     Scanner scanner = new Scanner(System.in);
     while (this.running) {
-      Logger.info("Enter a command: ");
+      Logger.info("\nEnter a command: ");
       String command = scanner.nextLine().toLowerCase();
       sendReceive(command);
     }

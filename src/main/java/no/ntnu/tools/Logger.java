@@ -6,6 +6,8 @@ package no.ntnu.tools;
  * places of our code.
  */
 public class Logger {
+  private static final String GREEN = "\u001B[32m";
+  private static final String RESET_COLOR = "\u001B[0m";
   /**
    * Not allowed to create an instance of this class.
    */
@@ -38,4 +40,13 @@ public class Logger {
   public static void error(String message) {
     System.err.println(message);
   }
+
+  /**
+   * Log a success message.
+   *
+   * @param message The success message to log
+   */
+    public static void success(String message) {
+      System.out.println(GREEN + message + RESET_COLOR);
+    }
 }
