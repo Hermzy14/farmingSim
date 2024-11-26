@@ -66,16 +66,23 @@ public class CommandLineControlPanel {
 
   private void printCommands() {
     // Print the available commands
-    System.out.printf("---------------------------------------------------------------------------%n");
-    System.out.printf("| %-15s | %-40s | %10s |%n", "COMMAND", "DESCRIPTION", "EXAMPLE USE");
-    System.out.printf("---------------------------------------------------------------------------%n");
+    // %-15s means a string with a width of 15 characters, left-aligned
+    // %-40s means a string with a width of 40 characters, left-aligned
+    System.out.printf(
+        "--------------------------------------------------------------------------------%n");
+    System.out.printf("| %-15s | %-40s | %-15s |%n", "COMMAND", "DESCRIPTION", "EXAMPLE USE");
+    System.out.printf(
+        "--------------------------------------------------------------------------------%n");
 
-    System.out.printf("| %-15s | %-40s | %10s |%n", "0x01 [nodeId]", "Request sensor data from a node", "0x01 1");
+    System.out.printf("| %-15s | %-40s | %-15s |%n",
+        "0x01 [nodeId]", "Request sensor data from a node", "0x01 1");
     //TODO: Add more commands here
-    System.out.printf("| %-15s | %-40s | %10s |%n", "help", "Prints the available commands", "help");
-    System.out.printf("| %-15s | %-40s | %10s |%n", "exit", "Exits the control panel", "exit");
+    System.out.printf("| %-15s | %-40s | %-15s |%n",
+        "help", "Prints the available commands", "help");
+    System.out.printf("| %-15s | %-40s | %-15s |%n", "exit", "Exits the control panel", "exit");
 
-    System.out.printf("---------------------------------------------------------------------------%n");
+    System.out.printf(
+        "--------------------------------------------------------------------------------%n");
   }
 
   private void sendReceive(String command) {
