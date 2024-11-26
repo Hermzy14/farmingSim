@@ -53,9 +53,7 @@ public class CommandLineControlPanel {
   public void run() {
     Logger.info("Running the control panel...");
     Logger.info("\nList of available commands:");
-    Logger.info("0x01 [nodeId] - Request sensor data from a node - Example node 1: 0x01 1");
-    Logger.info("exit - Exit the control panel");
-    // TODO: Add more commands
+    printCommands();
 
     this.running = true;
     Scanner scanner = new Scanner(System.in);
@@ -66,8 +64,24 @@ public class CommandLineControlPanel {
     }
   }
 
+  private void printCommands() {
+    // Print the available commands
+    System.out.printf("---------------------------------------------------------------------------%n");
+    System.out.printf("| %-15s | %-40s | %10s |%n", "COMMAND", "DESCRIPTION", "EXAMPLE USE");
+    System.out.printf("---------------------------------------------------------------------------%n");
+
+    System.out.printf("| %-15s | %-40s | %10s |%n", "0x01 [nodeId]", "Request sensor data from a node", "0x01 1");
+    //TODO: Add more commands here
+    System.out.printf("| %-15s | %-40s | %10s |%n", "help", "Prints the available commands", "help");
+    System.out.printf("| %-15s | %-40s | %10s |%n", "exit", "Exits the control panel", "exit");
+
+    System.out.printf("---------------------------------------------------------------------------%n");
+  }
+
   private void sendReceive(String command) {
-    if (command.equals("exit")) {
+    if (command.equals("help")) {
+      printCommands();
+    } else if (command.equals("exit")) {
       this.running = false;
       try {
         this.communicationChannel.close();
