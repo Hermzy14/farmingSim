@@ -40,6 +40,8 @@ public class CommandLineControlPanel {
 
   /**
    * Initialize the control panel.
+   *
+   * @return {@code true} if the control panel was initialized successfully, {@code false} otherwise.
    */
   public boolean init() {
     this.controlPanelLogic = new ControlPanelLogic();
