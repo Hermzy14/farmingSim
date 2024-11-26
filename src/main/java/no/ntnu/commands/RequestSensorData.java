@@ -4,6 +4,7 @@ import java.util.List;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.Sensor;
 import no.ntnu.greenhouse.SensorActuatorNode;
+import no.ntnu.greenhouse.SensorReading;
 
 /**
  * Command to request sensor data from a node.
@@ -34,24 +35,26 @@ public class RequestSensorData extends Command {
 
   @Override
   public String execute(GreenhouseSimulator greenhouse) {
-    //throw new IllegalArgumentException("Not implemented"); // TODO: Implement
-    StringBuilder sb;
+    StringBuilder sb = new StringBuilder();
     try {
       SensorActuatorNode node = greenhouse.getSensorNode(nodeId);
       if (node == null) {
-        return "Node not found";
+        return "Error: Node not found.";
       }
-      List<Sensor> sensors = node.getSensors();
-      sb = new StringBuilder();
-      for (Sensor sensor : sensors) {
-        sb.append(sensor.getReading().getFormatted());
-        sb.append(", ");
+      sb.append("0x01 ").append(nodeId).append(" ");
+      for (Sensor sensor : node.getSensors()) {
+        SensorReading reading = sensor.getReading();
+        sb.append(sensor.getType())
+            .append(":")
+            .append(reading != null ? reading.getUnit() : "unknown")
+            .append(":")
+            .append(reading != null ? reading.getFormatted() : "N/A")
+            .append(" ");
       }
     } catch (Exception e) {
-      sb = new StringBuilder();
-      sb.append("Error executing RequestSensorData: ");
-      sb.append(e.getMessage());
+      sb.append("Error executing RequestSensorData: ").append(e.getMessage());
     }
-    return sb.toString();
+    return sb.toString().trim(); // Ensure no trailing spaces
   }
+
 }

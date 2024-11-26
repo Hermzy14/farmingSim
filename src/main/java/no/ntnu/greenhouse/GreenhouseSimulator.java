@@ -86,7 +86,7 @@ public class GreenhouseSimulator {
           if (clientSocket != null) {
             Logger.info("Accepted new client connection: " + clientSocket.getInetAddress());
             ClientHandler clientHandler = new ClientHandler(this, clientSocket);
-            clientHandler.run();
+            clientHandler.start();
           }
         }
       }

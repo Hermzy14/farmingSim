@@ -65,6 +65,7 @@ public class ControlPanelStarter {
     logic.setCommunicationChannel(channel);
     if (channel.open()) {
       Logger.info("Communication channel opened");
+      Logger.info("Connection established");
     } else {
       Logger.error("Failed to open the communication channel");
     }
