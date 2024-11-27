@@ -50,6 +50,9 @@ public class SendActuatorCommand extends Command {
     if (node == null) {
       return "Error: Node not found.";
     }
+    if (nodeId != 1 && nodeId != 2 && nodeId != 3){
+      return "Invalid MAC authentication.";
+    }
     try {
       // Toggle the actuator
       node.toggleActuator(this.actuatorId);

@@ -41,6 +41,9 @@ public class RequestActuatorStatus extends Command {
       if (node == null) {
         return "Error: Node not found.";
       }
+      if (nodeId != 1 && nodeId != 2 && nodeId != 3){
+        return "Invalid MAC authentication.";
+      }
       ActuatorCollection actuators = node.getActuators();
       sb.append("Actuator status from node ").append(nodeId).append(": ");
       if (actuators.size() == 0) {
