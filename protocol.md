@@ -1,9 +1,9 @@
 # Candidate mapping
 This is a list of the candidates with their github usernames and candidate numbers.
-MilkDirt =
-Hermzy14 =
-mustafyu =
-Dennij =
+MilkDirt = 10204
+Hermzy14 = 10205
+mustafyu = 10202
+Dennij = 10225
 
 # Communication protocol
 This document describes the protocol used for communication between the different nodes of the
@@ -58,15 +58,14 @@ them here.
 
 We have set specific values for the different message types. These are used to identify the type of message that is being sent.
 Message Type Values:
-- SENSOR_DATA = 0x01
-- ACTUATOR_STATUS = 0x02
-- COMMAND_TO_ACTUATOR = 0x03
-- ACK = 0x04
-- REQUEST_SENSOR_DATA = 0x05
-- REQUEST_ACTUATOR_STATUS = 0x06
-- REQUEST_COMMAND_ACK = 0x07
-- REQUEST_ACK = 0x08
+- REQUEST_SENSOR_DATA = 0x01
+- REQUEST_ACTUATOR_STATUS = 0x02
+- SEND_ACTUATOR_COMMAND = 0x03
 
+Nodes will have a unique identifier, They will go from 1 and up. This will be used to identify the different nodes in the system.
+sensor node 1 = 1
+command node 2 = 2
+....
 
 
 ## Message format
@@ -87,14 +86,9 @@ We are going to have two main message categories: Sensor messages and Command me
    - Response: The recipient node replies with an ACK.
 
 Message Type Values:
-- SENSOR_DATA = 0x01
-- ACTUATOR_STATUS = 0x02
-- COMMAND_TO_ACTUATOR = 0x03
-- ACK = 0x04
-- REQUEST_SENSOR_DATA = 0x05
-- REQUEST_ACTUATOR_STATUS = 0x06
-- REQUEST_COMMAND_ACK = 0x07
-- REQUEST_ACK = 0x08
+- REQUEST_SENSOR_DATA = 0x01
+- REQUEST_ACTUATOR_STATUS = 0x02
+- SEND_ACTUATOR_COMMAND = 0x03
 
 For marshalling we will use TLV (Type-Lenght-Value) format. TLV is felxible and extensible, which is especially useful 
 for future protocol upgrades.
@@ -161,6 +155,15 @@ confirmations to Control Panel 2.
 - We have error handling for the different types of errors that can occur in the system. 
 - We will also implement a checksum to compare the received data with the expected data.
 - We define a timeout for each packet, so the sender can retransmit.
+
 ### Security:
-- Use encryption key-exchange to encrypt and decrypt messages.
+- Use encryption key-exchange to encrypt and decrypt messages. 
+This will ensure that the messages are secure and cannot be tampered with.
+To ensure that the messages are secure, we are using the AES encryption algorithm. 
+This will encrypt the messages before they are sent and decrypt them when they are received.
+We share public keys when we set up the connection, and then we use these keys to encrypt and decrypt the messages.
+
 - Use a MAC based authentication. This makes ti a lot harder for an intruder to tamper with the system.
+The MAC authentication in our project is configured as an if statement which cancels communication if,
+the nodeId is not equal to the nodeIds we have configured. There is alot of exceptions which will in most cases,
+stop this before we reach this layer, but it is an extra security measure.

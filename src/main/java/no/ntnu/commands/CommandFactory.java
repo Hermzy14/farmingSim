@@ -19,7 +19,7 @@ public class CommandFactory {
       throw new MessageFormatException("Message is empty");
     }
 
-    switch (parts[0]) { //TODO: Expand to include all commands
+    switch (parts[0]) {
       case "0x01":
         return new RequestSensorData(Integer.parseInt(parts[1]));
       case "0x02":
