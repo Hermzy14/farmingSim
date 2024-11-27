@@ -41,6 +41,9 @@ public class RequestSensorData extends Command {
       if (node == null) {
         return "Error: Node not found.";
       }
+      if (nodeId != 1 && nodeId != 2 && nodeId != 3){
+        return "Invalid MAC authentication.";
+      }
       sb.append("Readings from node ").append(nodeId).append(": ");
       for (Sensor sensor : node.getSensors()) {
         SensorReading reading = sensor.getReading();
