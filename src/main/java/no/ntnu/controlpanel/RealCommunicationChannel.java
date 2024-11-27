@@ -5,12 +5,26 @@ import static no.ntnu.tools.Parser.parseIntegerOrError;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.LinkedList;
 import java.util.List;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.SensorReading;
+import no.ntnu.tools.EncryptionDecryption;
 import no.ntnu.tools.Logger;
 
 /**
@@ -25,6 +39,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
   private static final String HOST = "localhost";
   private Thread communicationThread;
   private boolean running;
+  private SecretKey sharedSecret;
 
   /**
    * Create a new real communication channel.
@@ -56,6 +71,9 @@ public class RealCommunicationChannel implements CommunicationChannel {
         this.objectWriter = new ObjectOutputStream(this.socket.getOutputStream());
         this.objectWriter.flush();
         this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+
+        exchangeKeys();
+
         success = true;
       } catch (IOException e) {
         Logger.error("Connection attempt " + attempt + " failed: " + e.getMessage());
@@ -152,28 +170,64 @@ public class RealCommunicationChannel implements CommunicationChannel {
   }
 
   /**
-   * Receive a response from the server.
-   */
-  public String receiveResponse() throws IOException {
-      String response = this.reader.readLine();
-      return response;
-    }
-
-
-  /**
    * Send a command to the server.
    */
-  public void sendCommand(String command) throws IOException {
+  public void sendCommand(String command) {
     try {
       if (this.objectWriter == null) {
         Logger.error("Object writer is null, cannot send command");
         return;
       }
-      this.objectWriter.writeObject(command);
+      String encryptedCommand = EncryptionDecryption.encrypt(command, sharedSecret);
+      this.objectWriter.writeObject(encryptedCommand);
       this.objectWriter.flush();
       Logger.info("Sent command: " + command);
     } catch (IOException e) {
       Logger.error("Error sending command: " + e.getMessage());
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
+             IllegalBlockSizeException | BadPaddingException e) {
+      Logger.error("Error encrypting command: " + e.getMessage());
     }
   }
+
+  /**
+   * Receive a response from the server.
+   */
+  public String receiveResponse() throws IOException {
+    String response = this.reader.readLine();
+    return response;
+  }
+
+  public void exchangeKeys() {
+    try {
+      // Generate key pair
+      KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
+      keyPairGen.initialize(2048);
+      KeyPair keyPair = keyPairGen.generateKeyPair();
+      PrivateKey privateKey = keyPair.getPrivate();
+      PublicKey publicKey = keyPair.getPublic();
+
+      // Send public key to server
+      objectWriter.writeObject(publicKey);
+      objectWriter.flush();
+
+      // Receive public key from server
+      ObjectInputStream objectReader = new ObjectInputStream(socket.getInputStream());
+      PublicKey serverPublicKey = (PublicKey) objectReader.readObject();
+
+      // Generate shared secret
+      KeyAgreement keyAgree = KeyAgreement.getInstance("DH");
+      keyAgree.init(privateKey);
+      keyAgree.doPhase(serverPublicKey, true);
+      byte[] sharedSecretBytes = keyAgree.generateSecret();
+
+      // Derive AES key from shared secret
+      sharedSecret = new SecretKeySpec(sharedSecretBytes, 0, 16, "AES");
+    } catch (NoSuchAlgorithmException | InvalidKeyException | IOException e) {
+      Logger.error("Key exchange failed: " + e.getMessage());
+    } catch (ClassNotFoundException e) {
+      Logger.error("Error reading public key: " + e.getMessage());
+    }
+  }
+
 }

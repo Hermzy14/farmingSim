@@ -2,11 +2,22 @@ package no.ntnu.controlpanel;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import no.ntnu.commands.Command;
 import no.ntnu.commands.CommandFactory;
 import no.ntnu.greenhouse.GreenhouseSimulator;
+import no.ntnu.tools.EncryptionDecryption;
 import no.ntnu.tools.Logger;
 
 /**
@@ -17,6 +28,7 @@ public class ClientHandler extends Thread {
   private final Socket clientSocket;
   private ObjectInputStream objectReader;
   private PrintWriter socketWriter;
+  private SecretKey sharedSecret;
 
 
   public ClientHandler(GreenhouseSimulator client, Socket clientSocket) {
@@ -44,6 +56,9 @@ public class ClientHandler extends Thread {
     try {
       this.objectReader = new ObjectInputStream(this.clientSocket.getInputStream());
       this.socketWriter = new PrintWriter(this.clientSocket.getOutputStream(), true);
+
+      exchangeKeys();
+
       success = true;
     } catch (IOException e) {
       Logger.error("Failed to establish streams: " + e.getMessage());
@@ -71,7 +86,6 @@ public class ClientHandler extends Thread {
       closeSocket();
     }
   }
-
 
   private String receiveClientCommand() {
     try {
@@ -106,11 +120,19 @@ public class ClientHandler extends Thread {
     }
   }
 
-  private boolean handleCommand(String command) {
-    // Check if the command is empty
-    if (command == null || command.isEmpty()) {
+  private boolean handleCommand(String encryptedCommand) {
+    // Check if the encrypted command is empty or null
+    if (encryptedCommand == null || encryptedCommand.isEmpty()) {
       return false;
     }
+    String command;
+    try {
+      command = EncryptionDecryption.decrypt(encryptedCommand, sharedSecret);
+    } catch (Exception e) {
+      Logger.error("Error decrypting command: " + e.getMessage());
+      return false;
+    }
+
     // Special handling for shutdown command
     if ("SHUTDOWN".equals(command)) {
       Logger.info("Received shutdown command from client");
@@ -151,12 +173,46 @@ public class ClientHandler extends Thread {
     try {
       if (clientSocket != null && !clientSocket.isClosed()) {
         Logger.info("Closing socket for " + clientSocket.getRemoteSocketAddress());
-        if (objectReader != null) objectReader.close();
-        if (socketWriter != null) socketWriter.close();
+        if (objectReader != null) {
+          objectReader.close();
+        }
+        if (socketWriter != null) {
+          socketWriter.close();
+        }
         clientSocket.close();
       }
     } catch (IOException e) {
       Logger.error("Error closing socket: " + e.getMessage());
+    }
+  }
+
+  public void exchangeKeys() {
+    try {
+      // Generate key pair
+      KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
+      keyPairGen.initialize(2048);
+      KeyPair keyPair = keyPairGen.generateKeyPair();
+      PrivateKey privateKey = keyPair.getPrivate();
+      PublicKey publicKey = keyPair.getPublic();
+
+      // Receive public key from client
+      PublicKey clientPublicKey = (PublicKey) objectReader.readObject();
+
+      // Send public key to client
+      ObjectOutputStream objectWriter = new ObjectOutputStream(clientSocket.getOutputStream());
+      objectWriter.writeObject(publicKey);
+      objectWriter.flush();
+
+      // Generate shared secret
+      KeyAgreement keyAgree = KeyAgreement.getInstance("DH");
+      keyAgree.init(privateKey);
+      keyAgree.doPhase(clientPublicKey, true);
+      byte[] sharedSecretBytes = keyAgree.generateSecret();
+
+      // Derive AES key from shared secret
+      sharedSecret = new SecretKeySpec(sharedSecretBytes, 0, 16, "AES");
+    } catch (NoSuchAlgorithmException | InvalidKeyException | ClassNotFoundException | IOException e) {
+      Logger.error("Failed to generate key pair: " + e.getMessage());
     }
   }
 }

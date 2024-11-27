@@ -20,14 +20,18 @@ public class EncryptionDecryption {
    * Generate a secret key for encryption and decryption.
    *
    * @return A secret key or {@code null} if the key could not be generated.
-   * @throws NoSuchAlgorithmException If the encryption algorithm is not available
    */
-  public static SecretKey generateKey() throws NoSuchAlgorithmException {
-    SecretKey key = null;
-    KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
-    keyGenerator.init(256);
-    key = keyGenerator.generateKey();
-    return key;
+  public static SecretKey generateKey() {
+    try {
+      SecretKey key = null;
+      KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
+      keyGenerator.init(256);
+      key = keyGenerator.generateKey();
+      return key;
+    } catch (NoSuchAlgorithmException e) {
+      Logger.error("Failed to generate key: " + e.getMessage());
+      return null;
+    }
   }
 
   /**
@@ -36,11 +40,11 @@ public class EncryptionDecryption {
    * @param message The message to encrypt
    * @param key     The secret key to use for encryption
    * @return The encrypted message or {@code null} if the encryption failed.
-   * @throws NoSuchAlgorithmException   If the encryption algorithm is not available
-   * @throws NoSuchPaddingException     If the padding scheme is not available
-   * @throws InvalidKeyException        If the key is invalid
-   * @throws IllegalBlockSizeException  If the block size is invalid
-   * @throws BadPaddingException        If the padding is invalid
+   * @throws NoSuchAlgorithmException  If the encryption algorithm is not available
+   * @throws NoSuchPaddingException    If the padding scheme is not available
+   * @throws InvalidKeyException       If the key is invalid
+   * @throws IllegalBlockSizeException If the block size is invalid
+   * @throws BadPaddingException       If the padding is invalid
    */
   public static String encrypt(String message, SecretKey key) throws NoSuchAlgorithmException,
       NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -49,7 +53,7 @@ public class EncryptionDecryption {
     Cipher cipher = Cipher.getInstance(ALGORITHM);
     cipher.init(Cipher.ENCRYPT_MODE, key);
     byte[] encrypted = cipher.doFinal(message.getBytes());
-    encryptedMessage = new String(encrypted);
+    encryptedMessage = Base64.getEncoder().encodeToString(encrypted);
 
     return encryptedMessage;
   }
@@ -58,13 +62,13 @@ public class EncryptionDecryption {
    * Decrypt a message using a secret key.
    *
    * @param encryptedMessage The message to decrypt
-   * @param key The secret key to use for decryption
+   * @param key              The secret key to use for decryption
    * @return The decrypted message or {@code null} if the decryption failed.
-   * @throws NoSuchPaddingException     If the padding scheme is not available
-   * @throws NoSuchAlgorithmException   If the encryption algorithm is not available
-   * @throws InvalidKeyException        If the key is invalid
-   * @throws IllegalBlockSizeException  If the block size is invalid
-   * @throws BadPaddingException        If the padding is invalid
+   * @throws NoSuchPaddingException    If the padding scheme is not available
+   * @throws NoSuchAlgorithmException  If the encryption algorithm is not available
+   * @throws InvalidKeyException       If the key is invalid
+   * @throws IllegalBlockSizeException If the block size is invalid
+   * @throws BadPaddingException       If the padding is invalid
    */
   public static String decrypt(String encryptedMessage, SecretKey key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
