@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
+import no.ntnu.commands.ACKCommandStatus;
 import no.ntnu.controlpanel.ClientHandler;
 import no.ntnu.controlpanel.SensorActuatorNodeInfo;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
@@ -24,6 +26,7 @@ public class GreenhouseSimulator {
   private ServerSocket serverSocket;
   private boolean running;
   private Socket clientSocket;
+  private final Map<Integer, ACKCommandStatus> commandStatusMap = new ConcurrentHashMap<>();
 
   /**
    * Create a greenhouse simulator.
@@ -182,5 +185,24 @@ public class GreenhouseSimulator {
       throw new IllegalArgumentException("Node with ID " + nodeId + " not found");
     }
     return nodes.get(nodeId);
+  }
+
+    /**
+     * Get the information about all the nodes in the greenhouse.
+     *
+     * @return A list of all the nodes in the greenhouse
+     */
+  public void updateCommandStatus(int commandId, ACKCommandStatus status) {
+    commandStatusMap.put(commandId, status);
+  }
+
+    /**
+     * Get the status of a command.
+     *
+     * @param commandId The ID of the command
+     * @return The status of the command
+     */
+  public ACKCommandStatus getCommandStatus(int commandId) {
+    return commandStatusMap.get(commandId);
   }
 }

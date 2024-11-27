@@ -31,6 +31,22 @@ public class RequestCommandAck extends Command {
 
   @Override
   public String execute(GreenhouseSimulator greenhouse) {
-    throw new IllegalArgumentException("Not implemented"); // TODO: Implement
+    // 1. Check if the command ID is valid
+    ACKCommandStatus status = greenhouse.getCommandStatus(commandId);
+    if (status == null) {
+      return "ERROR: Invalid command ID";
+    }
+
+    // 2. Return the acknowledgment based on the command's status
+    switch (status) {
+      case SUCCESS:
+        return "ACK: Command executed successfully";
+      case PENDING:
+        return "ACK: Command execution is pending";
+      case FAILED:
+        return "ACK: Command execution failed";
+      default:
+        return "ACK: Unknown status";
+    }
   }
 }
