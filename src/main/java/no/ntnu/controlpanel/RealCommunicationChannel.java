@@ -1,7 +1,5 @@
 package no.ntnu.controlpanel;
 
-import static no.ntnu.tools.Parser.parseIntegerOrError;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,8 +12,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.LinkedList;
-import java.util.List;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
@@ -23,7 +19,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import no.ntnu.greenhouse.GreenhouseSimulator;
-import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.tools.EncryptionDecryption;
 import no.ntnu.tools.Logger;
 
@@ -150,6 +145,8 @@ public class RealCommunicationChannel implements CommunicationChannel {
   /**
    * Toggles the heartbeat on and off.
    * If the heartbeat is on, it will be turned off, and vice versa.
+   *
+   * @return {@code true} if the heartbeat is now on, {@code false} if it is off.
    */
   public boolean toggleHeartbeat() {
     boolean heartbeat = false;
@@ -192,13 +189,18 @@ public class RealCommunicationChannel implements CommunicationChannel {
 
   /**
    * Receive a response from the server.
+   *
+   * @return The response from the server.
    */
   public String receiveResponse() throws IOException {
     String response = this.reader.readLine();
     return response;
   }
 
-  public void exchangeKeys() {
+  /**
+   * Perform a key exchange with the server to establish a shared secret key.
+   */
+  private void exchangeKeys() {
     try {
       // Generate key pair
       KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");

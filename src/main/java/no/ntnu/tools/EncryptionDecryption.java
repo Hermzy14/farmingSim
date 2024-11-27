@@ -6,7 +6,6 @@ import java.util.Base64;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
@@ -15,24 +14,6 @@ import javax.crypto.SecretKey;
  */
 public class EncryptionDecryption {
   private static final String ALGORITHM = "AES";
-
-  /**
-   * Generate a secret key for encryption and decryption.
-   *
-   * @return A secret key or {@code null} if the key could not be generated.
-   */
-  public static SecretKey generateKey() {
-    try {
-      SecretKey key = null;
-      KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
-      keyGenerator.init(256);
-      key = keyGenerator.generateKey();
-      return key;
-    } catch (NoSuchAlgorithmException e) {
-      Logger.error("Failed to generate key: " + e.getMessage());
-      return null;
-    }
-  }
 
   /**
    * Encrypt a message using a secret key.

@@ -30,7 +30,12 @@ public class ClientHandler extends Thread {
   private PrintWriter socketWriter;
   private SecretKey sharedSecret;
 
-
+  /**
+   * Create a new client handler.
+   *
+   * @param client The greenhouse simulator
+   * @param clientSocket The client socket
+   */
   public ClientHandler(GreenhouseSimulator client, Socket clientSocket) {
     this.client = client;
     this.clientSocket = clientSocket;
@@ -65,7 +70,6 @@ public class ClientHandler extends Thread {
     }
     return success;
   }
-
 
   private void handleClientRequest() {
     try {
@@ -186,7 +190,10 @@ public class ClientHandler extends Thread {
     }
   }
 
-  public void exchangeKeys() {
+  /**
+   * Perform key exchange with the client.
+   */
+  private void exchangeKeys() {
     try {
       // Generate key pair
       KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
