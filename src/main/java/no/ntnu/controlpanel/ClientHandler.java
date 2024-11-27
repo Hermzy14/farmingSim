@@ -53,12 +53,6 @@ public class ClientHandler extends Thread {
 
 
   private void handleClientRequest() {
-//    String command;
-//    boolean shouldContinue;
-//    do {
-//      command = receiveClientCommand();
-//      shouldContinue = handleCommand(command);
-//    } while (shouldContinue);
     try {
       while (!Thread.currentThread().isInterrupted()) {
         String command = receiveClientCommand();
@@ -80,15 +74,6 @@ public class ClientHandler extends Thread {
 
 
   private String receiveClientCommand() {
-//    String command = null;
-//    try {
-//      command = (String) this.objectReader.readObject();
-//    } catch (IOException e) {
-//      Logger.error("Connection error while reading command: " + e.getMessage());
-//    } catch (ClassNotFoundException e) {
-//      Logger.error("Deserialization error: " + e.getMessage());
-//    }
-//    return command;
     try {
       // Check if the stream is available before reading
       if (objectReader == null || clientSocket.isClosed() || clientSocket.isInputShutdown()) {

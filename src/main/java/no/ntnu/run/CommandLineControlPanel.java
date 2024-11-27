@@ -16,6 +16,10 @@ import no.ntnu.tools.Logger;
  *   <li>Send commands to the greenhouse</li>
  *   <li>Display information about sensors</li>
  *   <li>Display information about actuators</li>
+ *   <li>Turn an actuator on or off</li>
+ *   <li>Turn heartbeat on or off</li>
+ *   <li>Display the available commands</li>
+ *   <li>Exit the control panel</li>
  * </ul>
  */
 public class CommandLineControlPanel {
@@ -53,10 +57,16 @@ public class CommandLineControlPanel {
    * Run the control panel.
    */
   public void run() {
+    // Start heartbeat
+    Logger.info("Starting heartbeat...");
+    Logger.info("This will send a request sensor data command to the server every minute.");
+    this.communicationChannel.startHeartbeat();
+
     Logger.info("Running the control panel...");
-    Logger.info("\nList of available commands:");
+    Logger.info("\nAvailable commands:");
     printCommands();
 
+    // Start the control panel
     this.running = true;
     Scanner scanner = new Scanner(System.in);
     while (this.running) {
@@ -83,6 +93,7 @@ public class CommandLineControlPanel {
     System.out.printf("| %-30s | %-40s | %-15s |%n",
         "0x03 [nodeId] [actuatorId]", "Turn an actuator on a node on or off", "0x03 1 2");
     //TODO: Add more commands here
+    System.out.printf("| %-30s | %-40s | %-15s |%n", "toggle", "Toggles the heartbeat", "toggle");
     System.out.printf("| %-30s | %-40s | %-15s |%n",
         "help", "Prints the available commands", "help");
     System.out.printf("| %-30s | %-40s | %-15s |%n", "exit", "Exits the control panel", "exit");
@@ -94,23 +105,41 @@ public class CommandLineControlPanel {
   private void sendReceive(String command) {
     if (command.equals("help")) {
       printCommands();
+    } else if (command.equals("toggle")) {
+      handleToggleHeartbeat();
     } else if (command.equals("exit")) {
-      this.running = false;
-      try {
-        this.communicationChannel.close();
-      } catch (Exception e) {
-        Logger.error("Error on closing the communication channel: " + e.getMessage());
-      }
+      handleExitCommand();
     } else {
-      try {
-        this.communicationChannel.sendCommand(command);
-        String response = this.communicationChannel.receiveResponse();
-        if (response != null) {
-          Logger.info("Response: " + response);
-        }
-      } catch (IOException e) {
-        Logger.error("Error on sending/receiving command: " + e.getMessage());
+      handleCommunicationCommand(command);
+    }
+  }
+
+  private void handleCommunicationCommand(String command) {
+    try {
+      this.communicationChannel.sendCommand(command);
+      String response = this.communicationChannel.receiveResponse();
+      if (response != null) {
+        Logger.info("Response: " + response);
       }
+    } catch (IOException e) {
+      Logger.error("Error on sending/receiving command: " + e.getMessage());
+    }
+  }
+
+  private void handleExitCommand() {
+    this.running = false;
+    try {
+      this.communicationChannel.close();
+    } catch (Exception e) {
+      Logger.error("Error on closing the communication channel: " + e.getMessage());
+    }
+  }
+
+  private void handleToggleHeartbeat() {
+    if (this.communicationChannel.toggleHeartbeat()) {
+      Logger.info("Heartbeat toggled on.");
+    } else {
+      Logger.info("Heartbeat toggled off.");
     }
   }
 }

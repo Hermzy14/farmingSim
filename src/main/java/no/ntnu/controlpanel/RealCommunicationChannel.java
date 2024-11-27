@@ -105,7 +105,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
    * Start continuous communication with the server.
    * This method will periodically send requests for sensor data to the server.
    */
-  public void startContinuousCommunication() {
+  public void startHeartbeat() {
     this.running = true;
     this.communicationThread = new Thread(() -> {
       while (this.running) {
@@ -114,13 +114,13 @@ public class RealCommunicationChannel implements CommunicationChannel {
           for (int nodeId : new int[] {1, 2, 3}) {
             sendCommand("0x01 " + nodeId);
             String response = receiveResponse();
-            Logger.info("Continuous communication response: " + response);
+            Logger.info("Heartbeat response: " + response + "\n");
           }
-
-          // Wait a bit between cycles
-          Thread.sleep(5000); // 5 seconds between cycles
-        } catch (IOException | InterruptedException e) {
-          Logger.error("Error in continuous communication: " + e.getMessage());
+          Thread.sleep(60000); // 1 minute between cycles
+        } catch (IOException e) {
+          Logger.error("Error in heartbeat: " + e.getMessage());
+          this.running = false;
+        } catch (InterruptedException e) {
           this.running = false;
         }
       }
@@ -130,9 +130,21 @@ public class RealCommunicationChannel implements CommunicationChannel {
   }
 
   /**
-   * Stop the continuous communication with the server.
+   * Toggles the heartbeat on and off.
+   * If the heartbeat is on, it will be turned off, and vice versa.
    */
-  public void stopContinuousCommunication() {
+  public boolean toggleHeartbeat() {
+    boolean heartbeat = false;
+    if (this.running) {
+      stopHeartbeat();
+    } else {
+      startHeartbeat();
+      heartbeat = true;
+    }
+    return heartbeat;
+  }
+
+  private void stopHeartbeat() {
     this.running = false;
     if (this.communicationThread != null) {
       this.communicationThread.interrupt();
