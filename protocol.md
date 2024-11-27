@@ -157,7 +157,11 @@ confirmations to Control Panel 2.
 - We define a timeout for each packet, so the sender can retransmit.
 
 ### Security:
-- Use encryption key-exchange to encrypt and decrypt messages.
+- Use encryption key-exchange to encrypt and decrypt messages. 
+This will ensure that the messages are secure and cannot be tampered with.
+To ensure that the messages are secure, we are using the AES encryption algorithm. 
+This will encrypt the messages before they are sent and decrypt them when they are received.
+We share public keys when we set up the connection, and then we use these keys to encrypt and decrypt the messages.
 
 - Use a MAC based authentication. This makes ti a lot harder for an intruder to tamper with the system.
 The MAC authentication in our project is configured as an if statement which cancels communication if,
