@@ -35,12 +35,31 @@ public class RealCommunicationChannel implements CommunicationChannel {
     this.logic = logic;
   }
 
+  public class ChecksumUtil {
+    public static int calculateChecksum(String data) {
+      return data.chars().sum() % 256;
+    }
+
+    public static boolean validateChecksum(String data, int receivedChecksum) {
+      return calculateChecksum(data) == receivedChecksum;
+    }
+  }
+
   @Override
   public void sendActuatorChange(int nodeId, int actuatorId, boolean isOn) {
     // Send the actuator change to the server
     String state = isOn ? "on" : "off";
     Logger.info("Sending command to greenhouse: turn " + state + " actuator"
         + "[" + actuatorId + "] on node " + nodeId);
+
+    String command = nodeId + " " + actuatorId + " " + (isOn ? "1" : "0");
+    String packet = command + " " + ChecksumUtil.calculateChecksum(command);
+
+    try {
+      sendCommand(packet);
+    } catch (IOException e) {
+      Logger.error("Failed to send command with checksum: " + e.getMessage());
+    }
   }
 
   @Override
@@ -143,9 +162,17 @@ public class RealCommunicationChannel implements CommunicationChannel {
    * Receive a response from the server.
    */
   public String receiveResponse() throws IOException {
-    String response = this.reader.readLine();
-    return response;
-  }
+    String packet = this.reader.readLine();
+    if (packet == null || !packet.contains(";")) return null;
+
+    String[] parts = packet.split(";");
+    if (parts.length < 4) return null;
+
+    String command = parts[0] + ";" + parts[1] + ";" + parts[2];
+    int receivedChecksum = Integer.parseInt(parts[3]);
+
+    return ChecksumUtil.validateChecksum(command, receivedChecksum) ? command : null;
+    }
 
   /**
    * Send a command to the server.
