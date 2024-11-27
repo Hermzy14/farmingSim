@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.zip.CRC32;
 import java.util.LinkedList;
 import java.util.List;
 import no.ntnu.greenhouse.GreenhouseSimulator;
@@ -36,11 +37,14 @@ public class RealCommunicationChannel implements CommunicationChannel {
   }
 
   public class ChecksumUtil {
-    public static int calculateChecksum(String data) {
-      return data.chars().sum() % 256;
+    // Calculates a CRC32 checksum for the given data
+    public static long calculateChecksum(String data) {
+      CRC32 crc32 = new CRC32();
+      crc32.update(data.getBytes()); //Add the data to the checksum calculator
+      return crc32.getValue();
     }
-
-    public static boolean validateChecksum(String data, int receivedChecksum) {
+    // Validate the checksum of the given data
+    public static boolean validateChecksum(String data, long receivedChecksum) {
       return calculateChecksum(data) == receivedChecksum;
     }
   }
@@ -52,8 +56,12 @@ public class RealCommunicationChannel implements CommunicationChannel {
     Logger.info("Sending command to greenhouse: turn " + state + " actuator"
         + "[" + actuatorId + "] on node " + nodeId);
 
+    // Create the command packet
     String command = nodeId + " " + actuatorId + " " + (isOn ? "1" : "0");
-    String packet = command + " " + ChecksumUtil.calculateChecksum(command);
+
+    // Calculate the checksum to the command
+      long checksum = ChecksumUtil.calculateChecksum(command);
+      String packet = command + ";" + checksum;
 
     try {
       sendCommand(packet);
@@ -162,17 +170,23 @@ public class RealCommunicationChannel implements CommunicationChannel {
    * Receive a response from the server.
    */
   public String receiveResponse() throws IOException {
+    // Read a packet from the communication channel
     String packet = this.reader.readLine();
-    if (packet == null || !packet.contains(";")) return null;
+   if (packet == null || packet.contains(",")) {
+     Logger.error("Invalid packet received: " + packet);
+        return null;
+   }
+   try {
+     String parts[] = packet.split(";");
+     String command = parts[0];
+     long receivedChecksum = Long.parseLong(parts[1]);
 
-    String[] parts = packet.split(";");
-    if (parts.length < 4) return null;
-
-    String command = parts[0] + ";" + parts[1] + ";" + parts[2];
-    int receivedChecksum = Integer.parseInt(parts[3]);
-
-    return ChecksumUtil.validateChecksum(command, receivedChecksum) ? command : null;
-    }
+     return  ChecksumUtil.validateChecksum(command, receivedChecksum) ? command : null;
+    } catch (Exception e) {
+        Logger.error("Error parsing packet: " + e.getMessage());
+        return null;
+   }
+  }
 
   /**
    * Send a command to the server.
