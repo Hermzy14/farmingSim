@@ -1,6 +1,10 @@
 package no.ntnu.commands;
 
+import no.ntnu.greenhouse.Actuator;
+import no.ntnu.greenhouse.ActuatorCollection;
 import no.ntnu.greenhouse.GreenhouseSimulator;
+import no.ntnu.greenhouse.Sensor;
+import no.ntnu.greenhouse.SensorActuatorNode;
 
 /**
  * Command to request the status of an actuator from a node.
@@ -29,8 +33,30 @@ public class RequestActuatorStatus extends Command {
     return nodeId;
   }
 
-    @Override
-    public String execute(GreenhouseSimulator greenhouse) {
-        throw new IllegalArgumentException("Not implemented"); // TODO: Implement
+  @Override
+  public String execute(GreenhouseSimulator greenhouse) {
+    StringBuilder sb = new StringBuilder();
+    try {
+      SensorActuatorNode node = greenhouse.getSensorNode(nodeId);
+      if (node == null) {
+        return "Error: Node not found.";
+      }
+      ActuatorCollection actuators = node.getActuators();
+      sb.append("Actuator status from node ").append(nodeId).append(": ");
+      if (actuators.size() == 0) {
+        sb.append("No actuators found for node ").append(nodeId).append(".");
+      } else {
+        for (Actuator actuator : actuators) {
+          sb.append("Actuator ")
+              .append(actuator.getId())
+              .append(": ")
+              .append(actuator.isOn() ? "on" : "off")
+              .append(", ");
+        }
+      }
+    } catch (Exception e) {
+      sb.append("Error executing RequestActuatorStatus: ").append(e.getMessage());
     }
+    return sb.toString().trim();
+  }
 }
