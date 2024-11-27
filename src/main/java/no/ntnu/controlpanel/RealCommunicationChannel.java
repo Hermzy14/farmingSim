@@ -172,7 +172,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
   public String receiveResponse() throws IOException {
     // Read a packet from the communication channel
     String packet = this.reader.readLine();
-   if (packet == null || packet.contains(",")) {
+   if (packet == null || !packet.contains(";")) {
      Logger.error("Invalid packet received: " + packet);
         return null;
    }
