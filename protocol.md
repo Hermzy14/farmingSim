@@ -168,3 +168,6 @@ confirmations to Control Panel 2.
 ### Security:
 - Use encryption key-exchange to encrypt and decrypt messages.
 - Use a MAC based authentication. This makes ti a lot harder for an intruder to tamper with the system.
+- The MAC authentication in our project is configured as an if statement which cancels communication if,
+- the nodeId is not equal to the nodeIds we have configured. There is alot of exceptions which will in most cases,
+- stop this before we reach this layer, but it is an extra security measure.
