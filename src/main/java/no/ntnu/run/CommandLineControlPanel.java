@@ -78,6 +78,8 @@ public class CommandLineControlPanel {
 
     System.out.printf("| %-15s | %-40s | %-15s |%n",
         "0x01 [nodeId]", "Request sensor data from a node", "0x01 1");
+    System.out.printf("| %-15s | %-40s | %-15s |%n",
+        "0x02 [nodeId]", "Request actuator data from a node", "0x02 1");
     //TODO: Add more commands here
     System.out.printf("| %-15s | %-40s | %-15s |%n",
         "help", "Prints the available commands", "help");
