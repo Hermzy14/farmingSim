@@ -1,6 +1,9 @@
 package no.ntnu.commands;
 
+import no.ntnu.exceptions.MessageFormatException;
+import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.GreenhouseSimulator;
+import no.ntnu.greenhouse.SensorActuatorNode;
 
 /**
  * Command to send an actuator command to a node. This could be to turn on a light, open a window, etc.
@@ -10,17 +13,17 @@ import no.ntnu.greenhouse.GreenhouseSimulator;
  */
 public class SendActuatorCommand extends Command {
   private final int nodeId;
-  private final int command;
+  private final int actuatorId;
 
   /**
    * Command to send an actuator command to a node.
    *
-   * @param nodeId  The ID of the node to send the actuator command to
-   * @param command The actuator command to send
+   * @param nodeId     The ID of the node to send the actuator command to
+   * @param actuatorId The ID of the actuator to send the command to
    */
-  public SendActuatorCommand(int nodeId, int command) {
+  public SendActuatorCommand(int nodeId, int actuatorId) {
     this.nodeId = nodeId;
-    this.command = command;
+    this.actuatorId = actuatorId;
   }
 
   /**
@@ -33,16 +36,30 @@ public class SendActuatorCommand extends Command {
   }
 
   /**
-   * Get the actuator command to send.
+   * Get the ID of the actuator to send the command to.
    *
-   * @return The actuator command.
+   * @return The ID of the actuator.
    */
-  public int getCommand() {
-    return this.command;
+  public int getActuatorId() {
+    return this.actuatorId;
   }
 
   @Override
   public String execute(GreenhouseSimulator greenhouse) {
-    throw new IllegalArgumentException("Not implemented"); //TODO: Implement
+    SensorActuatorNode node = greenhouse.getSensorNode(nodeId);
+    if (node == null) {
+      return "Error: Node not found.";
+    }
+    try {
+      // Toggle the actuator
+      node.toggleActuator(this.actuatorId);
+      // Get the actuator and return a message
+      Actuator actuator = node.getActuators().get(this.actuatorId);
+      // Return a message indicating the actuator state
+      return "Actuator " + this.actuatorId + " on node " + this.nodeId + " is now " +
+          (actuator.isOn() ? "ON" : "off");
+    } catch (IllegalArgumentException e) {
+      return "Error: " + e.getMessage();
+    }
   }
 }

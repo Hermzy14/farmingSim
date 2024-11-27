@@ -71,22 +71,24 @@ public class CommandLineControlPanel {
     // %-15s means a string with a width of 15 characters, left-aligned
     // %-40s means a string with a width of 40 characters, left-aligned
     System.out.printf(
-        "--------------------------------------------------------------------------------%n");
-    System.out.printf("| %-15s | %-40s | %-15s |%n", "COMMAND", "DESCRIPTION", "EXAMPLE USE");
+        "-----------------------------------------------------------------------------------------------%n");
+    System.out.printf("| %-30s | %-40s | %-15s |%n", "COMMAND", "DESCRIPTION", "EXAMPLE USE");
     System.out.printf(
-        "--------------------------------------------------------------------------------%n");
+        "-----------------------------------------------------------------------------------------------%n");
 
-    System.out.printf("| %-15s | %-40s | %-15s |%n",
+    System.out.printf("| %-30s | %-40s | %-15s |%n",
         "0x01 [nodeId]", "Request sensor data from a node", "0x01 1");
-    System.out.printf("| %-15s | %-40s | %-15s |%n",
+    System.out.printf("| %-30s | %-40s | %-15s |%n",
         "0x02 [nodeId]", "Request actuator data from a node", "0x02 1");
+    System.out.printf("| %-30s | %-40s | %-15s |%n",
+        "0x03 [nodeId] [actuatorId]", "Turn an actuator on a node on or off", "0x03 1 2");
     //TODO: Add more commands here
-    System.out.printf("| %-15s | %-40s | %-15s |%n",
+    System.out.printf("| %-30s | %-40s | %-15s |%n",
         "help", "Prints the available commands", "help");
-    System.out.printf("| %-15s | %-40s | %-15s |%n", "exit", "Exits the control panel", "exit");
+    System.out.printf("| %-30s | %-40s | %-15s |%n", "exit", "Exits the control panel", "exit");
 
     System.out.printf(
-        "--------------------------------------------------------------------------------%n");
+        "-----------------------------------------------------------------------------------------------%n");
   }
 
   private void sendReceive(String command) {
