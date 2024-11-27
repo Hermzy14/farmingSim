@@ -92,7 +92,6 @@ public class CommandLineControlPanel {
         "0x02 [nodeId]", "Request actuator data from a node", "0x02 1");
     System.out.printf("| %-30s | %-40s | %-15s |%n",
         "0x03 [nodeId] [actuatorId]", "Turn an actuator on a node on or off", "0x03 1 2");
-    //TODO: Add more commands here
     System.out.printf("| %-30s | %-40s | %-15s |%n", "toggle", "Toggles the heartbeat", "toggle");
     System.out.printf("| %-30s | %-40s | %-15s |%n",
         "help", "Prints the available commands", "help");
