@@ -143,9 +143,10 @@ public class RealCommunicationChannel implements CommunicationChannel {
    * Receive a response from the server.
    */
   public String receiveResponse() throws IOException {
-    String response = this.reader.readLine();
-    return response;
-  }
+      String response = this.reader.readLine();
+      return response;
+    }
+
 
   /**
    * Send a command to the server.
