@@ -1,9 +1,9 @@
 # Candidate mapping
 This is a list of the candidates with their github usernames and candidate numbers.
-MilkDirt =
-Hermzy14 =
-mustafyu =
-Dennij =
+MilkDirt = 10204
+Hermzy14 = 10205
+mustafyu = 10202
+Dennij = 10225
 
 # Communication protocol
 This document describes the protocol used for communication between the different nodes of the
@@ -67,6 +67,10 @@ Message Type Values:
 - REQUEST_COMMAND_ACK = 0x07
 - REQUEST_ACK = 0x08
 
+Nodes will have a unique identifier, They will go from 1 and up. This will be used to identify the different nodes in the system.
+sensor node 1 = 1
+command node 2 = 2
+....
 
 
 ## Message format
