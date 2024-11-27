@@ -172,20 +172,35 @@ public class RealCommunicationChannel implements CommunicationChannel {
   public String receiveResponse() throws IOException {
     // Read a packet from the communication channel
     String packet = this.reader.readLine();
-   if (packet == null || !packet.contains(";")) {
-     Logger.error("Invalid packet received: " + packet);
-        return null;
-   }
-   try {
-     String parts[] = packet.split(";");
-     String command = parts[0];
-     long receivedChecksum = Long.parseLong(parts[1]);
+    if (packet == null) {
+      Logger.error("Invalid packet received: null");
+      return null;
+    }
 
-     return  ChecksumUtil.validateChecksum(command, receivedChecksum) ? command : null;
-    } catch (Exception e) {
-        Logger.error("Error parsing packet: " + e.getMessage());
-        return null;
-   }
+    // Handle sensor data packets
+    if (packet.startsWith("Readings from node")) {
+      return packet; // Return immediately for sensor data
+    }
+
+    // Handle command;checksum format
+    String[] parts = packet.split(";", 2);
+    if (parts.length != 2) {
+      Logger.error("Malformed packet structure: " + packet);
+      return null;
+    }
+
+    try {
+      long receivedChecksum = Long.parseLong(parts[1]);
+      if (ChecksumUtil.validateChecksum(parts[0], receivedChecksum)) {
+        return parts[0];
+      } else {
+        Logger.error("Checksum validation failed for packet: " + packet);
+      }
+    } catch (NumberFormatException e) {
+      Logger.error("Invalid checksum in packet: " + packet);
+    }
+
+    return null;
   }
 
   /**
