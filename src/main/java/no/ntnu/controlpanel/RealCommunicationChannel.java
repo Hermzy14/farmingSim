@@ -57,7 +57,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
   public boolean open() {
     int attempt = 1; // Current connection attempt
     int maxAttempts = 5; // Maximum number of connection attempts
-    int delayBetweenAttempts = 2000; // Delay between connection attempts in milliseconds
+    int delayBetweenAttempts = 5000; // Delay between connection attempts in milliseconds
     boolean success = false;
 
     while ((attempt <= maxAttempts) && !success) {
@@ -69,6 +69,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
 
         exchangeKeys();
 
+        Logger.success("Connection established!");
         success = true;
       } catch (IOException e) {
         Logger.error("Connection attempt " + attempt + " failed: " + e.getMessage());
@@ -123,16 +124,9 @@ public class RealCommunicationChannel implements CommunicationChannel {
     this.communicationThread = new Thread(() -> {
       while (this.running) {
         try {
-          // Periodically send requests for sensor data
-          for (int nodeId : new int[] {1, 2, 3}) {
-            sendCommand("0x01 " + nodeId);
-            String response = receiveResponse();
-            Logger.info("Heartbeat response: " + response + "\n");
-          }
-          Thread.sleep(60000); // 1 minute between cycles
+          sendHeartbeatRequest();
         } catch (IOException e) {
-          Logger.error("Error in heartbeat: " + e.getMessage());
-          this.running = false;
+          handleHeartbeatConnectionError(e);
         } catch (InterruptedException e) {
           this.running = false;
         }
@@ -140,6 +134,25 @@ public class RealCommunicationChannel implements CommunicationChannel {
     });
     communicationThread.setDaemon(true);
     communicationThread.start();
+  }
+
+  private void sendHeartbeatRequest() throws IOException, InterruptedException {
+    // Periodically send requests for sensor data
+    for (int nodeId : new int[] {1, 2, 3}) {
+      sendCommand("0x01 " + nodeId);
+      String response = receiveResponse();
+      Logger.info("Heartbeat response: " + response + "\n");
+    }
+    Thread.sleep(60000); // 1 minute between cycles
+  }
+
+  private void handleHeartbeatConnectionError(IOException e) {
+    Logger.error("Error in heartbeat: " + e.getMessage());
+    Logger.info("Trying to reconnect...");
+    if (!open()) {
+      Logger.error("Reconnection failed, stopping heartbeat");
+      this.running = false;
+    }
   }
 
   /**

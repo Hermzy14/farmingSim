@@ -20,8 +20,8 @@ To run the greenhouse part (with sensor/actuator nodes):
 * GUI version: run the `main` method inside `GreenhouseGuiStarter` class. Note - if you run the
   `GreenhouseApplication` class directly, JavaFX will complain that it can't find necessary modules.
 
-To run the control panel (only GUI-version is available): run the `main` method inside the
-`ControlPanelStarter` class
+To run the control panel (only command line version is available): run the `main` method inside the
+`CommandLineControlPanel` class
 
 ## Simulating events
 
