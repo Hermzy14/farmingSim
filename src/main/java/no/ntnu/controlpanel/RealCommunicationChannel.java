@@ -64,7 +64,6 @@ public class RealCommunicationChannel implements CommunicationChannel {
 
   @Override
   public void sendActuatorChange(int nodeId, int actuatorId, boolean isOn) {
-    // Send the actuator change to the server
     String state = isOn ? "on" : "off";
     Logger.info("Sending command to greenhouse: turn " + state + " actuator"
         + "[" + actuatorId + "] on node " + nodeId);
@@ -201,9 +200,15 @@ public class RealCommunicationChannel implements CommunicationChannel {
         Logger.error("Object writer is null, cannot send command");
         return;
       }
+
+      // Generate checksum for the command
+      long checksum = ChecksumUtil.calculateChecksum(command);
+      String packetWithChecksum = command + ";" + checksum;
+
       String encryptedCommand = EncryptionDecryption.encrypt(command, sharedSecret);
       this.objectWriter.writeObject(encryptedCommand);
       this.objectWriter.flush();
+      Logger.info("Sent command: " + packetWithChecksum);
       Logger.info("Sent command: " + command);
     } catch (IOException e) {
       Logger.error("Error sending command: " + e.getMessage());
@@ -226,9 +231,12 @@ public class RealCommunicationChannel implements CommunicationChannel {
       return null;
     }
 
-    // Handle sensor data packets
-    if (packet.startsWith("Readings from node")) {
-      return packet; // Return immediately for sensor data
+
+    // Handle plain-text responses (e.g., actuator status or sensor data without a checksum)
+    if (!packet.contains(";")) {
+      // Log warning for responses without a checksum
+      Logger.info("Response missing checksum, assuming plain text: " + packet);
+      return packet;  // Return plain-text responses as-is
     }
 
     // Handle command;checksum format
