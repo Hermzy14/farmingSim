@@ -7,13 +7,12 @@ import java.util.Scanner;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import no.ntnu.commands.CommandFactory;
-import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.RealCommunicationChannel;
 import no.ntnu.tools.Logger;
 
 /**
  * Class for starting the command line control panel.
+ *
  * <p>From here the user should be able to:</p>
  * <ul>
  *   <li>Start the control panel</li>
@@ -29,7 +28,6 @@ import no.ntnu.tools.Logger;
  */
 public class CommandLineControlPanel {
   private RealCommunicationChannel communicationChannel;
-  private ControlPanelLogic controlPanelLogic;
   private boolean running;
 
   /**
@@ -50,11 +48,11 @@ public class CommandLineControlPanel {
   /**
    * Initialize the control panel.
    *
-   * @return {@code true} if the control panel was initialized successfully, {@code false} otherwise.
+   * @return {@code true} if the control panel was initialized successfully,
+   *      {@code false} otherwise.
    */
   public boolean init() {
-    this.controlPanelLogic = new ControlPanelLogic();
-    this.communicationChannel = new RealCommunicationChannel(controlPanelLogic);
+    this.communicationChannel = new RealCommunicationChannel();
     return this.communicationChannel.open();
   }
 
@@ -86,10 +84,12 @@ public class CommandLineControlPanel {
     // %-15s means a string with a width of 15 characters, left-aligned
     // %-40s means a string with a width of 40 characters, left-aligned
     System.out.printf(
-        "-----------------------------------------------------------------------------------------------%n");
+        "-----------------------------------------------------------------------------------------"
+            + "------%n");
     System.out.printf("| %-30s | %-40s | %-15s |%n", "COMMAND", "DESCRIPTION", "EXAMPLE USE");
     System.out.printf(
-        "-----------------------------------------------------------------------------------------------%n");
+        "-----------------------------------------------------------------------------------------"
+            + "------%n");
 
     System.out.printf("| %-30s | %-40s | %-15s |%n",
         "0x01 [nodeId]", "Request sensor data from a node", "0x01 1");
@@ -105,7 +105,8 @@ public class CommandLineControlPanel {
     System.out.printf("| %-30s | %-40s | %-15s |%n", "exit", "Exits the control panel", "exit");
 
     System.out.printf(
-        "-----------------------------------------------------------------------------------------------%n");
+        "-----------------------------------------------------------------------------------------"
+            + "------%n");
   }
 
   private void sendReceive(String command) {
@@ -134,8 +135,8 @@ public class CommandLineControlPanel {
         Logger.error("Reconnection failed, stopping the control panel");
         this.running = false;
       }
-    } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
-             BadPaddingException | InvalidKeyException e) {
+    } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException
+             | BadPaddingException | InvalidKeyException e) {
       Logger.error("Error on decrypting command: " + e.getMessage());
       this.running = false;
     }

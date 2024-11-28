@@ -1,5 +1,6 @@
 package no.ntnu.controlpanel;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -30,7 +31,7 @@ public class ClientHandler extends Thread {
   private ObjectInputStream objectReader;
   private PrintWriter socketWriter;
   private SecretKey sharedSecret;
-  private ChecksumHandler checksumHandler = new ChecksumHandler();
+  private final ChecksumHandler checksumHandler = new ChecksumHandler();
 
   /**
    * Create a new client handler.
@@ -41,8 +42,8 @@ public class ClientHandler extends Thread {
   public ClientHandler(GreenhouseSimulator client, Socket clientSocket) {
     this.client = client;
     this.clientSocket = clientSocket;
-    System.out.println("Greenhouse connected from " + clientSocket.getRemoteSocketAddress() +
-        ", port: " + clientSocket.getPort());
+    Logger.info("Greenhouse connected from " + clientSocket.getRemoteSocketAddress()
+        + ", port: " + clientSocket.getPort());
   }
 
   /**
@@ -54,18 +55,19 @@ public class ClientHandler extends Thread {
       handleClientRequest();
       closeSocket();
     }
-    System.out.println("Exiting the handler of the greenhouse " +
-        this.clientSocket.getRemoteSocketAddress());
+    Logger.info("Exiting the handler of the greenhouse "
+        + this.clientSocket.getRemoteSocketAddress());
   }
 
   private boolean establishStreams() {
     boolean success = false;
     try {
+      // Initialize the streams
       this.objectReader = new ObjectInputStream(this.clientSocket.getInputStream());
       this.socketWriter = new PrintWriter(this.clientSocket.getOutputStream(), true);
-
+      // Perform key exchange
       exchangeKeys();
-
+      // If we reach this point, the streams are successfully established
       success = true;
     } catch (IOException e) {
       Logger.error("Failed to establish streams: " + e.getMessage());
@@ -75,6 +77,7 @@ public class ClientHandler extends Thread {
 
   private void handleClientRequest() {
     try {
+      // While the thread is not interrupted, keep reading commands from the client
       while (!Thread.currentThread().isInterrupted()) {
         String command = receiveClientCommand();
         if (command == null) {
@@ -100,36 +103,28 @@ public class ClientHandler extends Thread {
         Logger.info("Socket is closed or input stream is shutdown");
         return null;
       }
-
+      // Read the object from the stream
       Object receivedObject = objectReader.readObject();
       if (receivedObject == null) {
         Logger.info("Received null object - potential connection closure");
         return null;
       }
-
+      // Check if the object is a string
       if (!(receivedObject instanceof String)) {
         Logger.error("Received non-string object: " + receivedObject.getClass());
         return null;
       }
-
+      // Check if the string is in the correct format
       String receivedData = (String) receivedObject;
-      String[] parts = receivedData.split(":", 2); // Split into two parts
+      // Split into two parts: the command and the checksum
+      String[] parts = receivedData.split(":", 2);
       if (parts.length != 2) {
         Logger.error("Invalid command format: " + receivedData);
         return null;
       }
-
-      String encryptedCommand = parts[0];
-      String receivedChecksum = parts[1];
-      String calculatedChecksum = checksumHandler.calculateChecksum(encryptedCommand);
-
-      if (!receivedChecksum.equals(calculatedChecksum)) {
-        Logger.error("Checksum mismatch: " + receivedChecksum + " != " + calculatedChecksum);
-        return null;
-      }
-
-      return encryptedCommand;
-    } catch (java.io.EOFException e) {
+      // Validate the checksum and return the command
+      return validateChecksum(parts);
+    } catch (EOFException e) {
       // This typically means the connection was closed
       Logger.info("End of stream reached - connection likely closed");
       return null;
@@ -145,47 +140,74 @@ public class ClientHandler extends Thread {
     }
   }
 
+  private String validateChecksum(String[] parts) throws NoSuchAlgorithmException {
+    String encryptedCommand = parts[0];
+    String receivedChecksum = parts[1];
+    String calculatedChecksum = checksumHandler.calculateChecksum(encryptedCommand);
+    if (!receivedChecksum.equals(calculatedChecksum)) {
+      Logger.error("Checksum mismatch: " + receivedChecksum + " != " + calculatedChecksum);
+      return null;
+    }
+    return encryptedCommand;
+  }
+
   private boolean handleCommand(String encryptedCommand) {
+    boolean shouldContinue = true;
     // Check if the encrypted command is empty or null
     if (encryptedCommand == null || encryptedCommand.isEmpty()) {
-      return false;
+      shouldContinue = false;
     }
+    // Decrypt the command
+    String command = decryptCommand(encryptedCommand);
+    if (command == null) {
+      shouldContinue = false;
+    }
+    // Special handling for shutdown command
+    if ("SHUTDOWN".equals(command)) {
+      Logger.info("Received shutdown command from client");
+      shouldContinue = false;
+    }
+    // Execute the command
+    executeCommand(command);
+    // If we reach this point, the command was successfully executed and we should continue
+    return shouldContinue;
+  }
+
+  private void executeCommand(String command) {
+    CommandFactory factory = new CommandFactory();
+    Logger.info("Command from the client: " + command);
+    String response = null;
+    String encryptedResponse = null;
+    // Execute the command
+    try {
+      Command cmd = factory.parseCommand(command);
+      response = cmd.execute(client);
+    } catch (IllegalArgumentException e) {
+      response = "ERROR: Invalid command format - " + e.getMessage();
+    } catch (Exception e) {
+      response = "Command execution error: " + e.getMessage();
+    }
+    // Encrypt the response
+    try {
+      encryptedResponse = EncryptionDecryption.encrypt(response, sharedSecret);
+    } catch (Exception e) {
+      Logger.error("Error encrypting response: " + e.getMessage());
+    }
+    // Send the encrypted response to the client
+    if (encryptedResponse != null) {
+      sendToClient(encryptedResponse);
+    }
+  }
+
+  private String decryptCommand(String encryptedCommand) {
     String command;
     try {
       command = EncryptionDecryption.decrypt(encryptedCommand, sharedSecret);
     } catch (Exception e) {
       Logger.error("Error decrypting command: " + e.getMessage());
-      return false;
+      return null;
     }
-
-    // Special handling for shutdown command
-    if ("SHUTDOWN".equals(command)) {
-      Logger.info("Received shutdown command from client");
-      return false;  // This will break the communication loop
-    }
-
-    boolean shouldContinue = true;
-    CommandFactory factory = new CommandFactory();
-    Logger.info("Command from the client: " + command);
-    String response = null;
-    String encryptedResponse = null;
-
-    try {
-      Command cmd = factory.parseCommand(command);
-      response = cmd.execute(client);
-      encryptedResponse = EncryptionDecryption.encrypt(response, sharedSecret);
-    } catch (IllegalArgumentException e) {
-      response = "ERROR: Invalid command format - " + e.getMessage();
-    } catch (Exception e) {
-      response = "ERROR: Command execution failed - " + e.getMessage();
-      Logger.error("Command execution error: " + e.getMessage());
-    }
-
-    if (encryptedResponse != null) {
-      sendToClient(encryptedResponse);
-    }
-
-    return shouldContinue;
+    return command;
   }
 
   private void sendToClient(String response) {
@@ -215,6 +237,7 @@ public class ClientHandler extends Thread {
 
   /**
    * Perform key exchange with the client.
+   * This method was created with help from GitHub Copilot.
    */
   private void exchangeKeys() {
     try {
@@ -225,13 +248,13 @@ public class ClientHandler extends Thread {
       PrivateKey privateKey = keyPair.getPrivate();
       PublicKey publicKey = keyPair.getPublic();
 
-      // Receive public key from client
-      PublicKey clientPublicKey = (PublicKey) objectReader.readObject();
-
       // Send public key to client
       ObjectOutputStream objectWriter = new ObjectOutputStream(clientSocket.getOutputStream());
       objectWriter.writeObject(publicKey);
       objectWriter.flush();
+
+      // Receive client's public key
+      PublicKey clientPublicKey = (PublicKey) objectReader.readObject();
 
       // Generate shared secret
       KeyAgreement keyAgree = KeyAgreement.getInstance("DH");
@@ -241,8 +264,8 @@ public class ClientHandler extends Thread {
 
       // Derive AES key from shared secret
       sharedSecret = new SecretKeySpec(sharedSecretBytes, 0, 16, "AES");
-    } catch (NoSuchAlgorithmException | InvalidKeyException | ClassNotFoundException |
-             IOException e) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | ClassNotFoundException
+             | IOException e) {
       Logger.error("Failed to generate key pair: " + e.getMessage());
     }
   }

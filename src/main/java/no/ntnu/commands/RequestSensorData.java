@@ -1,6 +1,5 @@
 package no.ntnu.commands;
 
-import java.util.List;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.Sensor;
 import no.ntnu.greenhouse.SensorActuatorNode;

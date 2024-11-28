@@ -2,15 +2,13 @@ package no.ntnu.greenhouse;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.net.Socket;
 import no.ntnu.controlpanel.ClientHandler;
-import no.ntnu.controlpanel.SensorActuatorNodeInfo;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 
@@ -81,14 +79,18 @@ public class GreenhouseSimulator {
    * Start the real communication with the greenhouse.
    */
   private void initiateRealCommunication() {
+    // Start a new thread for the server
     new Thread(() -> {
+      // Open a listening socket
       if (openListeningSocket()) {
         this.running = true;
         while (this.running) {
-          clientSocket = acceptNextClient();
-          if (clientSocket != null) {
-            Logger.info("Accepted new client connection: " + clientSocket.getInetAddress());
-            ClientHandler clientHandler = new ClientHandler(this, clientSocket);
+          // Accept the next client
+          this.clientSocket = acceptNextClient();
+          // If the client is not null, start a new client handler
+          if (this.clientSocket != null) {
+            Logger.info("Accepted new client connection: " + this.clientSocket.getInetAddress());
+            ClientHandler clientHandler = new ClientHandler(this, this.clientSocket);
             clientHandler.start();
           }
         }

@@ -1,6 +1,5 @@
 package no.ntnu.commands;
 
-import no.ntnu.exceptions.MessageFormatException;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.SensorActuatorNode;
@@ -33,15 +32,6 @@ public class SendActuatorCommand extends Command {
    */
   public int getNodeId() {
     return this.nodeId;
-  }
-
-  /**
-   * Get the ID of the actuator to send the command to.
-   *
-   * @return The ID of the actuator.
-   */
-  public int getActuatorId() {
-    return this.actuatorId;
   }
 
   @Override

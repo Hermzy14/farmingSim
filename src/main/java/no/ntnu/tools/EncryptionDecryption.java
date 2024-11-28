@@ -11,6 +11,8 @@ import javax.crypto.SecretKey;
 
 /**
  * A class for encrypting and decrypting messages.
+ * This class was created with help from GitHub Copilot.
+ * Code was modified to fit the project.
  */
 public class EncryptionDecryption {
   private static final String ALGORITHM = "AES";

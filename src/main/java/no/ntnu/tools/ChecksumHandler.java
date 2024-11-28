@@ -5,6 +5,8 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * A class for calculating checksums of data.
+ * This class was created with help from GitHub Copilot.
+ * Code was modified to fit the project.
  */
 public class ChecksumHandler {
   /**
@@ -15,9 +17,12 @@ public class ChecksumHandler {
    * @throws NoSuchAlgorithmException If the checksum algorithm is not available
    */
   public String calculateChecksum(String data) throws NoSuchAlgorithmException {
-    MessageDigest digest = MessageDigest.getInstance("SHA-256"); // Use SHA-256 for checksum
-    byte[] hash = digest.digest(data.getBytes()); // Calculate the hash
-    StringBuilder hexString = new StringBuilder(); // Convert the hash to a hex string
+    // Use SHA-256 for checksum
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    // Calculate the hash
+    byte[] hash = digest.digest(data.getBytes());
+    // Convert the hash to a hex string
+    StringBuilder hexString = new StringBuilder();
     for (byte b : hash) {
       String hex = Integer.toHexString(0xff & b);
       if (hex.length() == 1) {
@@ -25,6 +30,7 @@ public class ChecksumHandler {
       }
       hexString.append(hex);
     }
+    // Return the hex string
     return hexString.toString();
   }
 }

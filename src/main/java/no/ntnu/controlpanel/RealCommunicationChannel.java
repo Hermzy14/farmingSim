@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -29,7 +28,6 @@ import no.ntnu.tools.Logger;
  * (sending commands to the server) and receiving notifications about events.
  */
 public class RealCommunicationChannel implements CommunicationChannel {
-  private final ControlPanelLogic logic;
   private Socket socket;
   private BufferedReader reader;
   private ObjectOutputStream objectWriter;
@@ -37,15 +35,12 @@ public class RealCommunicationChannel implements CommunicationChannel {
   private Thread communicationThread;
   private boolean running;
   private SecretKey sharedSecret;
-  private ChecksumHandler checksumHandler = new ChecksumHandler();
+  private final ChecksumHandler checksumHandler = new ChecksumHandler();
 
   /**
    * Create a new real communication channel.
-   *
-   * @param logic The application logic of the control panel node.
    */
-  public RealCommunicationChannel(ControlPanelLogic logic) {
-    this.logic = logic;
+  public RealCommunicationChannel() {
   }
 
   @Override
@@ -56,27 +51,35 @@ public class RealCommunicationChannel implements CommunicationChannel {
         + "[" + actuatorId + "] on node " + nodeId);
   }
 
+  /**
+   * Open the communication channel.
+   *
+   * <p>If connection could not be established, we attempt again for a maximum amount of
+   * 5 times, with 5 seconds between each attempt.</p>
+   *
+   * @return {@code true} if the connection was established, {@code false} otherwise.
+   */
   @Override
   public boolean open() {
     int attempt = 1; // Current connection attempt
     int maxAttempts = 5; // Maximum number of connection attempts
     int delayBetweenAttempts = 5000; // Delay between connection attempts in milliseconds
     boolean success = false;
-
+    // Try to establish a connection
     while ((attempt <= maxAttempts) && !success) {
       try {
         this.socket = new Socket(HOST, GreenhouseSimulator.TCP_PORT);
         this.objectWriter = new ObjectOutputStream(this.socket.getOutputStream());
         this.objectWriter.flush();
         this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-
+        // Perform key exchange
         exchangeKeys();
-
+        // If we reach this point, the connection is successfully established
         Logger.success("Connection established!");
         success = true;
       } catch (IOException e) {
         Logger.error("Connection attempt " + attempt + " failed: " + e.getMessage());
-
+        // Wait before next attempt
         try {
           Thread.sleep(delayBetweenAttempts);
         } catch (InterruptedException ex) {
@@ -86,17 +89,15 @@ public class RealCommunicationChannel implements CommunicationChannel {
       }
       attempt++;
     }
-
     // Log an error if the connection was not established
     if (!success) {
       Logger.error("Failed to establish connection after " + maxAttempts + " attempts");
     }
-
     return success;
   }
 
   /**
-   * Close the communication channel.
+   * Closes the communication channel.
    */
   public void close() {
     try {
@@ -108,6 +109,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
     } catch (IOException e) {
       Logger.error("Error sending shutdown signal: " + e.getMessage());
     } finally {
+      // Close the socket
       try {
         if (socket != null && !socket.isClosed()) {
           socket.close();
@@ -132,8 +134,8 @@ public class RealCommunicationChannel implements CommunicationChannel {
           handleHeartbeatConnectionError(e);
         } catch (InterruptedException e) {
           this.running = false;
-        } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
-                 BadPaddingException | InvalidKeyException e) {
+        } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException
+                 | BadPaddingException | InvalidKeyException e) {
           Logger.error("Error while decrypting: " + e.getMessage());
         }
       }
@@ -189,6 +191,8 @@ public class RealCommunicationChannel implements CommunicationChannel {
 
   /**
    * Send a command to the server.
+   *
+   * @param command The command to send.
    */
   public void sendCommand(String command) {
     try {
@@ -196,15 +200,18 @@ public class RealCommunicationChannel implements CommunicationChannel {
         Logger.error("Object writer is null, cannot send command");
         return;
       }
-      String encryptedCommand = EncryptionDecryption.encrypt(command, this.sharedSecret); // Encrypt command
-      String checksum = this.checksumHandler.calculateChecksum(encryptedCommand); // Calculate checksum
-      this.objectWriter.writeObject(encryptedCommand + ":" + checksum); // Send encrypted command and checksum
+      // Encrypt command and calculate checksum
+      String encryptedCommand = EncryptionDecryption.encrypt(command, this.sharedSecret);
+      String checksum = this.checksumHandler.calculateChecksum(encryptedCommand);
+      // Send encrypted command and checksum
+      this.objectWriter.writeObject(encryptedCommand + ":" + checksum);
       this.objectWriter.flush();
+      // Log the sent command
       Logger.info("Sent command: " + command);
     } catch (IOException e) {
       Logger.error("Error sending command: " + e.getMessage());
-    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
-             IllegalBlockSizeException | BadPaddingException e) {
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException
+             | IllegalBlockSizeException | BadPaddingException e) {
       Logger.error("Error encrypting command: " + e.getMessage());
     }
   }
@@ -214,15 +221,17 @@ public class RealCommunicationChannel implements CommunicationChannel {
    *
    * @return The response from the server.
    */
-  public String receiveResponse()
-      throws IOException, NoSuchPaddingException, IllegalBlockSizeException,
-      NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-//    String response = this.reader.readLine();
+  public String receiveResponse() throws IOException, NoSuchPaddingException,
+      IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
+      InvalidKeyException {
+    // Read encrypted response
     String encryptedResponse = this.reader.readLine();
+    // If the response is null, return null
     if (encryptedResponse == null) {
       return null;
     }
-    return EncryptionDecryption.decrypt(encryptedResponse, this.sharedSecret); // Decrypt response
+    // Return the decrypted response
+    return EncryptionDecryption.decrypt(encryptedResponse, this.sharedSecret);
   }
 
   /**
@@ -238,8 +247,8 @@ public class RealCommunicationChannel implements CommunicationChannel {
       PublicKey publicKey = keyPair.getPublic();
 
       // Send public key to server
-      objectWriter.writeObject(publicKey);
-      objectWriter.flush();
+      this.objectWriter.writeObject(publicKey);
+      this.objectWriter.flush();
 
       // Receive public key from server
       ObjectInputStream objectReader = new ObjectInputStream(socket.getInputStream());
@@ -252,7 +261,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
       byte[] sharedSecretBytes = keyAgree.generateSecret();
 
       // Derive AES key from shared secret
-      sharedSecret = new SecretKeySpec(sharedSecretBytes, 0, 16, "AES");
+      this.sharedSecret = new SecretKeySpec(sharedSecretBytes, 0, 16, "AES");
     } catch (NoSuchAlgorithmException | InvalidKeyException | IOException e) {
       Logger.error("Key exchange failed: " + e.getMessage());
     } catch (ClassNotFoundException e) {
