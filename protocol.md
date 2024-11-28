@@ -57,6 +57,7 @@ Message Type Values:
 - REQUEST_SENSOR_DATA = 0x01
 - REQUEST_ACTUATOR_STATUS = 0x02
 - SEND_ACTUATOR_COMMAND = 0x03
+- LIST SENSORS = list
 
 Nodes will have a unique identifier, They will go from 1 and up. This will be used to identify the different nodes in the system.
 sensor node 1 = 1
@@ -77,14 +78,15 @@ We are going to have two main message categories: Sensor messages and Command me
    - Push command: the control panel sends a COMMAND_TO_ACTUATOR message.
    - Pull Acknowledgment: The control panel sends a REQUEST_COMMAND_ACK message.
    - Response: the actuator replies with an ACK message indicating whether the command was received and executed.
-4. ACK (acknowledgment on demand)
-   - Request: The control panel sends a REQUEST_ACK message with a specific message ID.
-   - Response: The recipient node replies with an ACK.
+4. LIST SENSORS
+   - Request: The control panel sends a REQUEST_LIST message to a sensor node.
+   - Response: The sensor node replies with a LIST message which lists all the available sensor/actuator nodes.
 
 Message Type Values:
 - REQUEST_SENSOR_DATA = 0x01
 - REQUEST_ACTUATOR_STATUS = 0x02
 - SEND_ACTUATOR_COMMAND = 0x03
+- LIST SENSORS = list
 
 For marshalling we will use TLV (Type-Lenght-Value) format. TLV is felxible and extensible, which is especially useful 
 for future protocol upgrades.
@@ -103,19 +105,6 @@ TLV structure:
    Then send an error response back to the control-panel node.
    - Control-panel node should notify the user about the error ("Invalid response from sensor node") then we ask user 
    if we should retry sending the message.
-2. **ConnectionError**:
-   - If a node receives a message with an invalid or expired session.
-   - The control-panel node will attempt to reconnect automatically and retry the message transmission up to a specified 
-   number of attempts. If we exceed the max retries, then we log the connection error and notify the application 
-   layer and user.
-   - The sensor/actuator nodes should also retry the message transmission up to the defined limit, as well as log the 
-   failure and send an alert to the control-panel (if possible).
-3. **UnexpectedError**:
-   - For any other unexpected errors.
-   - Should log the error details.
-   - Handle the error "gracefully" so that nothing crashes.
-   - Notify application layer about the error.
-   - Notify user about error.
 
 ## An example scenario
 1.  Sensor Node ID= 1 is started:
