@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -19,6 +20,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import no.ntnu.greenhouse.GreenhouseSimulator;
+import no.ntnu.tools.ChecksumHandler;
 import no.ntnu.tools.EncryptionDecryption;
 import no.ntnu.tools.Logger;
 
@@ -35,6 +37,7 @@ public class RealCommunicationChannel implements CommunicationChannel {
   private Thread communicationThread;
   private boolean running;
   private SecretKey sharedSecret;
+  private ChecksumHandler checksumHandler = new ChecksumHandler();
 
   /**
    * Create a new real communication channel.
@@ -188,8 +191,9 @@ public class RealCommunicationChannel implements CommunicationChannel {
         Logger.error("Object writer is null, cannot send command");
         return;
       }
-      String encryptedCommand = EncryptionDecryption.encrypt(command, sharedSecret);
-      this.objectWriter.writeObject(encryptedCommand);
+      String encryptedCommand = EncryptionDecryption.encrypt(command, this.sharedSecret); // Encrypt command
+      String checksum = this.checksumHandler.calculateChecksum(encryptedCommand); // Calculate checksum
+      this.objectWriter.writeObject(encryptedCommand + ":" + checksum); // Send encrypted command and checksum
       this.objectWriter.flush();
       Logger.info("Sent command: " + command);
     } catch (IOException e) {

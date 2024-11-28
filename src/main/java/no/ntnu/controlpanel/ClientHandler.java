@@ -17,6 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
 import no.ntnu.commands.Command;
 import no.ntnu.commands.CommandFactory;
 import no.ntnu.greenhouse.GreenhouseSimulator;
+import no.ntnu.tools.ChecksumHandler;
 import no.ntnu.tools.EncryptionDecryption;
 import no.ntnu.tools.Logger;
 
@@ -29,11 +30,12 @@ public class ClientHandler extends Thread {
   private ObjectInputStream objectReader;
   private PrintWriter socketWriter;
   private SecretKey sharedSecret;
+  private ChecksumHandler checksumHandler = new ChecksumHandler();
 
   /**
    * Create a new client handler.
    *
-   * @param client The greenhouse simulator
+   * @param client       The greenhouse simulator
    * @param clientSocket The client socket
    */
   public ClientHandler(GreenhouseSimulator client, Socket clientSocket) {
@@ -110,7 +112,24 @@ public class ClientHandler extends Thread {
         return null;
       }
 
-      return (String) receivedObject;
+      String receivedData = (String) receivedObject;
+      String[] parts = receivedData.split(":", 2); // Split into two parts
+      if (parts.length != 2) {
+        Logger.error("Invalid command format: " + receivedData);
+        return null;
+      }
+
+      String encryptedCommand = parts[0];
+      String receivedChecksum = parts[1];
+      Logger.info("Received checksum: " + receivedChecksum);
+      String calculatedChecksum = checksumHandler.calculateChecksum(encryptedCommand);
+
+      if (!receivedChecksum.equals(calculatedChecksum)) {
+        Logger.error("Checksum mismatch: " + receivedChecksum + " != " + calculatedChecksum);
+        return null;
+      }
+
+      return encryptedCommand;
     } catch (java.io.EOFException e) {
       // This typically means the connection was closed
       Logger.info("End of stream reached - connection likely closed");
@@ -120,6 +139,9 @@ public class ClientHandler extends Thread {
       return null;
     } catch (ClassNotFoundException e) {
       Logger.error("Deserialization error: class not found: " + e.getMessage());
+      return null;
+    } catch (NoSuchAlgorithmException e) {
+      Logger.error("Checksum calculation error: " + e.getMessage());
       return null;
     }
   }
@@ -218,7 +240,8 @@ public class ClientHandler extends Thread {
 
       // Derive AES key from shared secret
       sharedSecret = new SecretKeySpec(sharedSecretBytes, 0, 16, "AES");
-    } catch (NoSuchAlgorithmException | InvalidKeyException | ClassNotFoundException | IOException e) {
+    } catch (NoSuchAlgorithmException | InvalidKeyException | ClassNotFoundException |
+             IOException e) {
       Logger.error("Failed to generate key pair: " + e.getMessage());
     }
   }
