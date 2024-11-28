@@ -163,7 +163,7 @@ public class ClientHandler extends Thread {
       shouldContinue = false;
     }
     // Special handling for shutdown command
-    if ("SHUTDOWN".equals(command)) {
+    if (command.equals("SHUTDOWN")) {
       Logger.info("Received shutdown command from client");
       shouldContinue = false;
     }

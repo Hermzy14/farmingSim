@@ -103,20 +103,14 @@ public class RealCommunicationChannel implements CommunicationChannel {
     try {
       // Send a shutdown signal if needed
       if (objectWriter != null) {
-        objectWriter.writeObject("SHUTDOWN");
-        objectWriter.flush();
+        sendCommand("SHUTDOWN");
+      }
+      // Close the socket
+      if (socket != null && !socket.isClosed()) {
+        socket.close();
       }
     } catch (IOException e) {
-      Logger.error("Error sending shutdown signal: " + e.getMessage());
-    } finally {
-      // Close the socket
-      try {
-        if (socket != null && !socket.isClosed()) {
-          socket.close();
-        }
-      } catch (IOException e) {
-        Logger.error("Error closing socket: " + e.getMessage());
-      }
+      Logger.error("Error closing socket: " + e.getMessage());
     }
   }
 
