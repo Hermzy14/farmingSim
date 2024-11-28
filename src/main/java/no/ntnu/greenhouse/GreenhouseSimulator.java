@@ -2,6 +2,8 @@ package no.ntnu.greenhouse;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +26,6 @@ public class GreenhouseSimulator {
   private ServerSocket serverSocket;
   private boolean running;
   private Socket clientSocket;
-
 
 
   /**
@@ -184,5 +185,14 @@ public class GreenhouseSimulator {
       throw new IllegalArgumentException("Node with ID " + nodeId + " not found");
     }
     return nodes.get(nodeId);
+  }
+
+  /**
+   * Returns all the sensor/actuator nodes in the greenhouse.
+   *
+   * @return A list of all the nodes
+   */
+  public ArrayList<SensorActuatorNode> getSensors() {
+    return new ArrayList<>(nodes.values().stream().toList());
   }
 }

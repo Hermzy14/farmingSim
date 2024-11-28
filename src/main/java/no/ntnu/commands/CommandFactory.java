@@ -26,6 +26,8 @@ public class CommandFactory {
         return new RequestActuatorStatus(Integer.parseInt(parts[1]));
       case "0x03":
         return new SendActuatorCommand(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+      case "list":
+        return new ListSensors();
       default:
         throw new MessageFormatException("Unknown command: " + parts[0]);
     }
