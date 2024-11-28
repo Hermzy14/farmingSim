@@ -121,7 +121,6 @@ public class ClientHandler extends Thread {
 
       String encryptedCommand = parts[0];
       String receivedChecksum = parts[1];
-      Logger.info("Received checksum: " + receivedChecksum);
       String calculatedChecksum = checksumHandler.calculateChecksum(encryptedCommand);
 
       if (!receivedChecksum.equals(calculatedChecksum)) {
@@ -169,10 +168,12 @@ public class ClientHandler extends Thread {
     CommandFactory factory = new CommandFactory();
     Logger.info("Command from the client: " + command);
     String response = null;
+    String encryptedResponse = null;
 
     try {
       Command cmd = factory.parseCommand(command);
       response = cmd.execute(client);
+      encryptedResponse = EncryptionDecryption.encrypt(response, sharedSecret);
     } catch (IllegalArgumentException e) {
       response = "ERROR: Invalid command format - " + e.getMessage();
     } catch (Exception e) {
@@ -180,14 +181,14 @@ public class ClientHandler extends Thread {
       Logger.error("Command execution error: " + e.getMessage());
     }
 
-    if (response != null) {
-      sendToServer(response);
+    if (encryptedResponse != null) {
+      sendToClient(encryptedResponse);
     }
 
     return shouldContinue;
   }
 
-  private void sendToServer(String response) {
+  private void sendToClient(String response) {
     try {
       this.socketWriter.println(response);
     } catch (Exception e) {

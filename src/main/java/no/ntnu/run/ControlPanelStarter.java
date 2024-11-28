@@ -1,6 +1,11 @@
 package no.ntnu.run;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import no.ntnu.controlpanel.CommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.FakeCommunicationChannel;
@@ -87,6 +92,9 @@ public class ControlPanelStarter {
       }
     } catch (IOException e) {
       Logger.error("Error while sending/receiving command: " + e.getMessage());
+    } catch (NoSuchPaddingException | InvalidKeyException | BadPaddingException |
+             NoSuchAlgorithmException | IllegalBlockSizeException e) {
+      Logger.error("Error on decrypting command: " + e.getMessage());
     }
   }
 

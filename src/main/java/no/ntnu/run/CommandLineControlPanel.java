@@ -1,7 +1,12 @@
 package no.ntnu.run;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import no.ntnu.commands.CommandFactory;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.RealCommunicationChannel;
@@ -127,6 +132,10 @@ public class CommandLineControlPanel {
         Logger.error("Reconnection failed, stopping the control panel");
         this.running = false;
       }
+    } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
+             BadPaddingException | InvalidKeyException e) {
+      Logger.error("Error on decrypting command: " + e.getMessage());
+      this.running = false;
     }
   }
 

@@ -132,6 +132,9 @@ public class RealCommunicationChannel implements CommunicationChannel {
           handleHeartbeatConnectionError(e);
         } catch (InterruptedException e) {
           this.running = false;
+        } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
+                 BadPaddingException | InvalidKeyException e) {
+          Logger.error("Error while decrypting: " + e.getMessage());
         }
       }
     });
@@ -139,7 +142,9 @@ public class RealCommunicationChannel implements CommunicationChannel {
     communicationThread.start();
   }
 
-  private void sendHeartbeatRequest() throws IOException, InterruptedException {
+  private void sendHeartbeatRequest()
+      throws IOException, InterruptedException, NoSuchPaddingException, IllegalBlockSizeException,
+      NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
     // Periodically send requests for sensor data
     for (int nodeId : new int[] {1, 2, 3}) {
       sendCommand("0x01 " + nodeId);
@@ -209,9 +214,15 @@ public class RealCommunicationChannel implements CommunicationChannel {
    *
    * @return The response from the server.
    */
-  public String receiveResponse() throws IOException {
-    String response = this.reader.readLine();
-    return response;
+  public String receiveResponse()
+      throws IOException, NoSuchPaddingException, IllegalBlockSizeException,
+      NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+//    String response = this.reader.readLine();
+    String encryptedResponse = this.reader.readLine();
+    if (encryptedResponse == null) {
+      return null;
+    }
+    return EncryptionDecryption.decrypt(encryptedResponse, this.sharedSecret); // Decrypt response
   }
 
   /**
