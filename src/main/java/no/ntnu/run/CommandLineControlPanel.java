@@ -122,6 +122,11 @@ public class CommandLineControlPanel {
       }
     } catch (IOException e) {
       Logger.error("Error on sending/receiving command: " + e.getMessage());
+      Logger.info("Trying to reconnect...");
+      if (!this.communicationChannel.open()) {
+        Logger.error("Reconnection failed, stopping the control panel");
+        this.running = false;
+      }
     }
   }
 
