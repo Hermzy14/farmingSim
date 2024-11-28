@@ -49,7 +49,7 @@ public class CommandLineControlPanel {
    * Initialize the control panel.
    *
    * @return {@code true} if the control panel was initialized successfully,
-   *      {@code false} otherwise.
+   * {@code false} otherwise.
    */
   public boolean init() {
     this.communicationChannel = new RealCommunicationChannel();
@@ -73,6 +73,13 @@ public class CommandLineControlPanel {
     this.running = true;
     Scanner scanner = new Scanner(System.in);
     while (this.running) {
+      // Add a small delay before the next command so the user can read the output without
+      // "Enter a command:" being printed immediately
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        Logger.error("Error in control panel: " + e.getMessage());
+      }
       Logger.info("\nEnter a command: ");
       String command = scanner.nextLine().toLowerCase();
       sendReceive(command);
