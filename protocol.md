@@ -52,10 +52,6 @@ nodes are available and what their current state is. It being a connection-orien
 possibility for good error handling and ensuring data integrity.
 
 ## Types, constants
-
-TODO - Do you have some specific value types you use in several messages? Then you can describe 
-them here.
-
 We have set specific values for the different message types. These are used to identify the type of message that is being sent.
 Message Type Values:
 - REQUEST_SENSOR_DATA = 0x01
